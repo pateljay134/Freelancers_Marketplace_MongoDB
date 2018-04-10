@@ -22,25 +22,21 @@ class AddProject extends React.Component{
     }
       
     handleName(e){
-        //debugger
         this.setState({
             name : e.target.value
         })
     }
     handleDescription(e){
-        //debugger
         this.setState({
             description : e.target.value
         })
     }
     handleSkills(e){
-        //debugger
         this.setState({
             skills : e.target.value
         })
     }
     handleRange(e){
-        //debugger
         this.setState({
             range : e.target.value
         })
@@ -59,7 +55,7 @@ class AddProject extends React.Component{
 
     handleSubmit(e){
         e.preventDefault();
-        debugger
+        
 
         const formData = new FormData();
         formData.append('file', this.state.file);

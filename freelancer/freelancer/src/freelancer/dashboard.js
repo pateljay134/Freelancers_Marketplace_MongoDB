@@ -6,13 +6,16 @@ import './css/util.css';
 import DisplayProjects from './displayprojects';
 import axios from 'axios';
 import './css/one-page-wonder.min.css';
+ 
+// import 'node_modules/react-bootstrap-table/dist/react-bootstrap-table-all.min.css';
 // import { relative } from 'path';
 
 class DashBoard extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {projects : [],average_days:[]}
+        this.state = {projects : [],average_days:null, project_id : null, total_bids : null, current_page : 1, rows_per_page : 10}
         this.handleChange = this.handleChange.bind(this)
+        this.handlePageChange = this.handlePageChange.bind(this)
     }
 
     componentDidMount() {
@@ -23,7 +26,27 @@ class DashBoard extends React.Component{
                 projects : res.data.rows
             })
         });
-        debugger
+        
+
+
+        // if(this.props.project_id !== null){
+        //     var project_details = { project_id : this.props.project_id}
+        //     axios.post('http://localhost:3001/projectfetch', project_details)
+        //     .then(res => {
+        //         this.setState({
+        //             average_days : res.data.result
+        //         })
+        //     });
+    
+        //     axios.post('http://localhost:3001/projectbidcount', project_details)
+        //     .then(res => {
+        //         this.setState({
+        //             total_bids : res.data.total_bids
+        //         })
+        //     });
+    
+        //     }
+
     }
 
     handleChange(e){
@@ -36,21 +59,45 @@ class DashBoard extends React.Component{
             })
         });
     }
-
+    handlePageChange(e){
+        e.preventDefault();
+        this.setState({
+            current_page : e.target.dataset.id
+        })
+    }
 	render(){
         if(this.state.projects === null){
             <DisplayProjects/>
         }else{
-        var project_list = this.state.projects.map( data => { 
-            // if(data.status==="PENDING"){
-                return(
-                    
-                <DisplayProjects project_id = {data.project_id}  title = {data.title} description = {data.description} skills_required = {data.skills_required} employer = {data.employer} budget_range = {data.budget_range} status = {data.status}/>
+            
+            
+            console.log(this.state.projects)
+            const lastIndex = this.state.current_page * this.state.rows_per_page;
+            const firstIndex = lastIndex - this.state.rows_per_page;
+            const projects_to_show = this.state.projects.slice(firstIndex, lastIndex);
+            // const total_pages = this.state.projects.length > 0 ? this.state.projects.length/this.state.rows_per_page : 0;
+            const page_numbers = [];
+            for (let i = 1; i <= Math.ceil(this.state.projects.length / this.state.rows_per_page); i++) {
+                page_numbers.push(i);
+            }  
+            var pagination = page_numbers.map(number => {
+                return (
+                    <div style={{float : "left"}}><li class="pagination pagination-lg" key= {number} data-id={number} onClick={this.handlePageChange} ><a data-id={number} class="page-link" href="/">{number}</a></li></div>
+                );
+            });
 
-                )
-            // }
-        })
-    }
+            var project_list = projects_to_show.map( data => { 
+                // this.countDays(data.project_id)
+                // this.countTotalBids(data.project_id)
+                // if(data.status=== "PENDING" || data.status=== "ON GOING"){
+                    return(
+                        
+                    <DisplayProjects project_id = {data.project_id}  title = {data.title} description = {data.description} skills_required = {data.skills_required} employer = {data.employer} budget_range = {data.budget_range} status = {data.status}/>
+
+                    )
+                // }
+            })
+        }
 
 
         if(window.sessionStorage.logged_in === "true"){
@@ -89,6 +136,9 @@ class DashBoard extends React.Component{
                             {project_list}
                         </tbody>
                     </table>
+
+                    
+                    <center style={{float : "right", marginRight: 30}}>{pagination}</center>
                 </div>
             )
         }

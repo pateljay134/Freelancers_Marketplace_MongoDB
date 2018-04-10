@@ -7,6 +7,7 @@ var multiparty = require('multiparty');
 var fs = require('fs');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
 
 var users = require('./src/freelancer/models/users');
 var projects = require('./src/freelancer/models/projects');
@@ -53,7 +54,6 @@ app.post('/signupprocess', function(req, res) {
 
   var bcrypt = require('bcrypt');
   const saltRounds = 10;
-  // console.log(req.body)
   mongoose.connect(url, function(err, db) {
     if (err) res.json({logged_in:false});
     else{
@@ -62,7 +62,6 @@ app.post('/signupprocess', function(req, res) {
           var myobj = { name: req.body.name, email : req.body.email, password: hash, profile_image:null, balance:0, assigned_project_id : [] };
           db.collection("users").insertOne(myobj, function(err, result) {
             if (err) {
-              console.log(err);
               res.json({logged_in:false});
             }
             else{
@@ -90,7 +89,6 @@ app.post('/signinprocess', function(req, res) {
           var myobj = { email : req.body.email, password: hash };
           db.collection("users").findOne(myobj, function(err, result) {
             if (err) {
-              console.log(err);
               res.json({logged_in:false});
             }
             else{
@@ -108,7 +106,6 @@ app.post('/signinprocess', function(req, res) {
 });
 
 app.post('/addproject', function(req, res) {
-    // console.log(req.body.username)
     var project  = new projects;
     let form = new multiparty.Form();
     form.parse(req, (err, fields, files) => {
@@ -120,7 +117,6 @@ app.post('/addproject', function(req, res) {
       mongoose.connect(url, function(err, db) {
       if (err) throw err;
       else{
-        console.log(project.id)
         var myobj = { project_id : project.id, days:0, title: fields.name[0] , description : fields.description[0], skills_required: fields.skills[0], employer:fields.email[0], budget_range:fields.range[0], file:fileName, status : "PENDING" };
 
         db.collection("projects").insertOne(myobj, function(err, result) {
@@ -148,7 +144,6 @@ app.post('/addproject', function(req, res) {
 app.post('/profilefetch', function(req, res) {
   mongoose.connect(url, function(err, db) {
     if (err) throw err;
-
     else{
       db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
         if(!err){
@@ -164,7 +159,6 @@ app.post('/profilefetch', function(req, res) {
 });
 
 app.post('/bidderfetch', function(req, res) {
-  console.log(req.body.username)
   connection.query("SELECT * from users where username = ?",req.body.username,function(err, rows) {
     if(rows.length>=1){
       res.json({rows : rows[0]})
@@ -177,7 +171,6 @@ app.post('/bidderfetch', function(req, res) {
 });
 
 app.post('/profileupdate', function(req, res) {
-  // // console.log(req.body)
   // var sql = "update users SET name = '"+req.body.name+"', phone_number = '"+req.body.phone_number+ "', skills = '"+req.body.skills + "', about_me = '"+req.body.about_me +"' WHERE username = '"+ req.body.username+"'";  
   // connection.query(sql,  function(err, result) {
   //   res.json({data_inserted:true});
@@ -276,7 +269,7 @@ app.post('/projectbidcount', function(req, res) {
     else{
       db.collection("project_bids").find({project_id: req.body.project_id}).toArray(function(err, result){
           if(!err && typeof result[0] !== "undefined"){
-              res.json({total_bids:result.length})
+              res.json({project_id : result[0].project_id, total_bids:result.length})
           }else{
               res.json({result:null})
           }
@@ -289,24 +282,34 @@ app.post('/projectbidcount', function(req, res) {
 app.post('/hirebidder', function(req, res) {
   var email = req.body.bidder_email
   var project_id = req.body.project_id
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+           user: 'nodemailerfreelancer@gmail.com',
+           pass: 'Thejoker@13'
+       }
+   });
+   const mailOptions = {
+    from: 'nodemailerfreelancer@gmail.com',
+    to: req.body.bidder_email,
+    subject: 'You are hired for the project',
+    html: '<p>Go, Start Earning Money<p>'
+  };
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error)
+            console.log(error);
+    });
+
   mongoose.connect(url, function(err, db) {
     if (err) throw err;
     else{
-      db.collection("projects").update({project_id : req.body.project_id}, { $set: {status: 'ON GOING', hiredbidder : req.body.bidder_email , hiredbiddername : req.body.bidder_name}}, function(err, rows){
+      db.collection("projects").update({project_id : req.body.project_id, status : "PENDING" }, { $set: {status: 'ON GOING', hiredbidder : req.body.bidder_email , hiredbiddername : req.body.bidder_name}}, function(err, rows){
         if(!err){
-          console.log(project_id)
           db.collection("users").update(
             { email : email },
             { $push: { assigned_project_id : project_id} }
           )
-          // db.collection("users").update({email : email}, { $push: { assigned_project_id : req.body.project_id } }, function(err, rows){
-          //   if(!err){
-          //     res.json({bidder_hired:true});
-          //   }
-          //   else{
-          //     res.json({bidder_hired:false})
-          //   }
-          // })
+          res.json({bidder_hired:true})
         }else{
           res.json({bidder_hired:false})
         }
@@ -360,6 +363,32 @@ app.post('/projectsfetch', function(req, res) {
     else{
       db.collection("projects").find().toArray(function(err, rows){
         if(!err){
+                      // db.collection("projects").find().toArray(function(err, rows){
+                      //   if(!err){
+                          // db.collection("project_bids").aggregate(
+                          //     {
+                          //       $group:
+                          //         {
+                          //           _id: "$project_id",
+                          //           avg: { $avg: "$days" }
+                          //         }
+                          //     }).toArray(function(err, result){
+                          //     if(!err && typeof result[0] !== "undefined"){
+                          //       console.log(result)
+                          //         res.json({rows:rows[0], result:result[0].avg.toFixed(2)})
+                          //     }else{
+                          //         res.json({rows:rows[0], result:null})
+                          //     }
+                          // });
+                        // }
+                        // else{
+                        //   res.json({logged_in:false})
+                        // }
+                  // });
+
+
+
+
           res.json({rows : rows})
         }
         else{
@@ -376,10 +405,8 @@ app.post('/projectfetch', function(req, res) {
   mongoose.connect(url, function(err, db) {
     if (err) res.json({logged_in:false})
     else{
-      // console.log(req.body.project_id)
           db.collection("projects").find({project_id : req.body.project_id}).toArray(function(err, rows){
             if(!err){
-              // console.log(rows)
               db.collection("project_bids").aggregate(
                 [ { $match: {"project_id": req.body.project_id }},
                   {
@@ -390,7 +417,6 @@ app.post('/projectfetch', function(req, res) {
                       }
                   }
                 ]).toArray(function(err, result){
-                  // console.log(result)
                   if(!err && typeof result[0] !== "undefined"){
                       res.json({rows:rows[0], result:result[0].avg.toFixed(2)})
                   }else{
@@ -423,7 +449,6 @@ app.post('/searchprojects', function(req, res) {
           }
         ]).toArray(function(err, rows){
         if(!err && rows.length!==0){
-          console.log(rows)
           res.json({rows : rows})
         }
         else{
@@ -435,7 +460,61 @@ app.post('/searchprojects', function(req, res) {
   });
 
 });
+app.post('/searchuserprojects', function(req, res) {
+  mongoose.connect(url, function(err, db) {
+    if (err) res.json({logged_in:false})
+    else{
+      db.collection("projects").aggregate(
+        [ 
+          { $match: {$and : [ { $or: 
+            [ { "title" : { $regex:  req.body.search_data, $options: "i"} }, 
+              { "skills_required": { $regex:  req.body.search_data, $options: "i"} },
+              { "status": { $regex:  req.body.search_data, $options: "i"} }
+            ] 
+          }, {"employer": { $regex:  req.body.email, $options: "i"} } 
+        ]}   
+          }
+        ]).toArray(function(err, rows){
+        if(!err && rows.length!==0){
+          res.json({rows : rows})
+        }
+        else{
+          res.json({rows : null})
+        }
+      })
+      
+    }
+  });
 
+});
+app.post('/searchbiddedproject', function(req, res) {
+  mongoose.connect(url, function(err, db) {
+    if (err) res.json({logged_in:false})
+    else{
+      db.collection("project_bids").aggregate(
+        [ 
+          { $match: {$and : [ { $or: 
+            [ { "project_data.title" : { $regex:  req.body.search_data, $options: "i"} }, 
+              { "project_data.skills_required": { $regex:  req.body.search_data, $options: "i"} },
+              { "project_data.status": { $regex:  req.body.search_data, $options: "i"} },
+              { "project_data.employer": { $regex:  req.body.search_data, $options: "i"} }
+            ] 
+          }, {"bidder_email": { $regex:  req.body.email, $options: "i"} } 
+        ]}   
+          }
+        ]).toArray(function(err, rows){
+        if(!err && rows.length!==0){
+          res.json({rows : rows})
+        }
+        else{
+          res.json({rows : null})
+        }
+      })
+      
+    }
+  });
+
+});
 
 app.post('/filterstatus', function(req, res) {
   mongoose.connect(url, function(err, db) {
@@ -462,11 +541,33 @@ app.post('/filterstatus', function(req, res) {
   });
 
 });
-
+app.post('/biddingfilterstatus', function(req, res) {
+  mongoose.connect(url, function(err, db) {
+    if (err) res.json({logged_in:false})
+    else{
+      db.collection("project_bids").aggregate(
+        [ 
+          { $match: 
+            { $and : [
+              { "project_data.status" : { $regex:  req.body.search_data} } ,
+              { "bidder_email": { $regex:  req.body.employer} }
+            ]}
+          }
+        ]).toArray(function(err, rows){
+        if(!err && rows.length!==0){
+          res.json({rows : rows})
+        }
+        else{
+          res.json({rows : null})
+        }
+      })
+      
+    }
+  });
+});
 
 app.post('/addbid', function(req, res) {
   var project_bid  = new project_bids;
-  console.log(req.body.project_data)
   mongoose.connect(url, function(err, db) {
     if (err) res.json({logged_in:false})
     else{
@@ -490,9 +591,6 @@ app.post('/balanceupdate', function(req, res) {
     else{
       db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
         if(!err){
-          console.log(rows)
-          console.log(rows[0].balance)
-          console.log(Number(rows[0].balance) + Number(req.body.amount))
           var transaction = {name_on_card : req.body.name_on_card , card_number : req.body.card_number , expiry_date : req.body.expiry_date , amount : req.body.amount}
           db.collection("users").update({email : req.body.email}, { $set: {balance : rows[0].balance === null ? Number(req.body.amount) : Number(rows[0].balance) + Number(req.body.amount), transaction } }, function(err, rows){
             if(!err){
@@ -515,6 +613,76 @@ app.post('/balanceupdate', function(req, res) {
     }
   });
 
+});
+
+app.post('/withdrawbalance', function(req, res) {
+  mongoose.connect(url, function(err, db) {
+    if (err) throw err;
+    else{
+      db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
+        var transaction = {bank_account : req.body.bank_account , routing_number : req.body.routing_number, amount : req.body.amount}
+        db.collection("users").update({email : req.body.email}, { $set: {balance : rows[0].balance === (0 || null)? Number(req.body.amount) : Number(rows[0].balance) + Number(req.body.amount), transaction } }, function(err, rows){
+          if(!err){
+            db.collection("tranaction").update(
+              { email : req.body.email },
+              { $push: { transaction_details : transaction } }
+            )
+            res.json({data_inserted:true});
+          }
+          else{
+            res.json({data_inserted:false})
+          }
+        })
+      })
+          
+      }})
+});
+
+app.post('/transfermoney', function(req, res) {
+  mongoose.connect(url, function(err, db) {
+    if (err) throw err;
+    else{
+      db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
+        var transaction = {bank_account : req.body.bank_account , routing_number : req.body.routing_number, amount : "-"+req.body.amount}
+        db.collection("users").update({email : req.body.email}, { $set: {balance : rows[0].balance === 0? Number("-"+req.body.amount) : Number(rows[0].balance) + Number("-"+req.body.amount), transaction } }, function(err, rows){
+          if(!err){
+            db.collection("tranaction").update(
+              { email : req.body.email },
+              { $push: { transaction_details : transaction } }
+            )
+            db.collection("users").find({email : req.body.bidder_email}).toArray(function(err, rows){
+              var transaction = {bank_account : req.body.bank_account , routing_number : req.body.routing_number, amount : req.body.amount}
+              db.collection("users").update({email : req.body.bidder_email}, { $set: {balance : rows[0].balance === (0 || null)? Number(req.body.amount) : Number(rows[0].balance) + Number(req.body.amount), transaction } }, function(err, rows){
+                if(!err){
+                  db.collection("tranaction").update(
+                    { email : req.body.bidder_email },
+                    { $push: { transaction_details : transaction } }
+                  )
+                  db.collection("projects").update(
+                    { project_id : req.body.project_id },
+                    { $set: {status: 'CLOSED'}}
+                  )
+
+                  db.collection("project_bids").update(
+                    { project_id : req.body.project_id },
+                    { $set: { "project_data.status" : "CLOSED"} }
+                  )
+                  res.json({data_inserted:true});
+                }
+                else{
+                  res.json({data_inserted:false})
+                }
+              })
+            })
+          }
+          else{
+            res.json({data_inserted:false})
+          }
+        })
+      })
+
+          
+      }})
 });
 
 

@@ -40,7 +40,7 @@ class SignUp extends React.Component{
     }
     handleSubmit(e){
         e.preventDefault();
-        debugger
+        
         // var password = new RegExp("^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
         // var email = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         var error = false
@@ -64,7 +64,6 @@ class SignUp extends React.Component{
                     
         // }else{ document.getElementById('password').innerHTML = "" 
         // error = false}
-        //     debugger
 
         if(!error){
 

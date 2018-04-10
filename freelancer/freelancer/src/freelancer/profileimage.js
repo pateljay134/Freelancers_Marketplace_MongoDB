@@ -63,7 +63,7 @@ class ProfileImage extends React.Component{
         formData.append('email', window.sessionStorage.getItem("email"));
         // console.log(formData)
         //formData.append()
-        debugger
+        
         const config = {
             headers: {
                 'content-type': 'multipart/form-data'
@@ -71,7 +71,7 @@ class ProfileImage extends React.Component{
         }
         axios.post('http://localhost:3001/imageupdate', formData, config)
         .then(res => {
-            debugger
+            
             var data_inserted = res.data.image_updated;
             if(data_inserted){
                 alert('update successful');
@@ -110,7 +110,7 @@ class ProfileImage extends React.Component{
             )
         }
         else if(this.state.image_name === null){
-            debugger
+            
             return(
                 <div>
                     <img src={require("../images/avatar.gif")} style={{width: 110, height: 120, marginLeft:145}} alt = "Not Uploaded Yet"/>
@@ -119,6 +119,7 @@ class ProfileImage extends React.Component{
                             Update Profile Image
                         </button>
                     </div>
+
                 </div>
             )
         }

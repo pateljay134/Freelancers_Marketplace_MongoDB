@@ -18,7 +18,7 @@ import './css/one-page-wonder.min.css';
 class AddBid extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {days: null, usd: null, status : null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
+        this.state = {days: null, usd: null, hired_bidder : null, status : null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleDays = this.handleDays.bind(this);
         this.handleUSD = this.handleUSD.bind(this);
@@ -39,7 +39,7 @@ class AddBid extends React.Component{
         var val = {project_data : project_data, project_id : window.sessionStorage.getItem("project_id"), days: this.state.days, usd : this.state.usd, employer : this.state.employer, bidder_email: window.sessionStorage.getItem("email"), bidder_name: window.sessionStorage.getItem("name")}
         axios.post('http://localhost:3001/addbid', val)
         .then(res => {
-            debugger
+            
             var bid_added = res.data.bid_added;
             if(bid_added){
                 window.location.href = 'http://localhost:3000/Dashboard';
@@ -63,9 +63,9 @@ class AddBid extends React.Component{
         window.location.href = "http://localhost:3000/adminaction"
     }
     componentDidMount() {
-        debugger
+        
         var project_details = { project_id : window.sessionStorage.getItem("project_id")}
-        debugger
+        
         axios.post('http://localhost:3001/projectfetch', project_details)
         .then(res => {
             this.setState({
@@ -75,7 +75,8 @@ class AddBid extends React.Component{
                 description : res.data.rows.description,
                 skills : res.data.rows.skills_required,
                 budget_range : res.data.rows.budget_range,
-                status : res.data.rows.status
+                status : res.data.rows.status,
+                hired_bidder : res.data.rows.hired_bidder
 
             })
         });
@@ -112,29 +113,53 @@ class AddBid extends React.Component{
                     </div>
            
                 )
-        }else{
-            return(
-                <div className="limiter">
-                    <div className="container-login100">
-                        <div className="wrap-login100 p-t-50 p-b-90">
-                            <form method = "POST" className="login100-form validate-form flex-sb flex-w">
-                                <span className="login100-form-title p-b-51"> Project Details</span>
-                               <ProjectData/>
-    
-                            </form>
-                            <button className="login100-form-btn-bid" style={{width:"100%"}} value  = {this.props.project_id} onClick = {this.handleClick}>View Bidders</button>
+            }else if(this.state.hired_bidder === window.sessionStorage.getItem("email")){
+                return(
+                    <div className="limiter">
+                        <div className="container-login100">
+                            <div className="wrap-login100 p-t-50 p-b-90">
+                                <form method = "POST" className="login100-form validate-form flex-sb flex-w">
+                                    <span className="login100-form-title p-b-51"> Project Details</span>
+                                <ProjectData/>
+        
+                                </form>
+                                <form>
+                                <div className="input100" data-validate = "File is required">
+                                    <input type="file" onChange={this.handleFile} className="input100" style = {{marginTop:10}}/><br />
+                                </div>
+                                <div className="wrap-input100 validate-input m-b-16" data-validate = "Add Comments">
+                                    <input className="input100" type="text" name="comment-box" required onChange = {this.handleName.bind(this)} placeholder="Add Comments" />
+                                    <span className="focus-input100"></span>
+					            </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )    
-        }
-    } else{
+                )    
+            }else{
+                return(
+                    <div className="limiter">
+                        <div className="container-login100">
+                            <div className="wrap-login100 p-t-50 p-b-90">
+                                <form method = "POST" className="login100-form validate-form flex-sb flex-w">
+                                    <span className="login100-form-title p-b-51"> Project Details</span>
+                                <ProjectData/>
+        
+                                </form>
+                                <button className="login100-form-btn-bid" style={{width:"100%"}} value  = {this.props.project_id} onClick = {this.handleClick}>View Bidders</button>
+                            </div>
+                        </div>
+                    </div>
+                )    
+            }
+        } else{
 
-        console.log("Hello")
-        return(
-            <AddBid/>
-        )
-    }}
+            console.log("Hello")
+            return(
+                <AddBid/>
+            )
+        }
+    }
 }
 
 export default AddBid;

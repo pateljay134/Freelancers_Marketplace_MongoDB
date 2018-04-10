@@ -12,14 +12,14 @@ class BidderProfileDetails extends React.Component{
     componentWillMount() {
         var bidderprofileemail = window.sessionStorage.getItem("bidderprofileemail")
         // var bidderprofile = window.sessionStorage.getItem("bidderprofile")
-        debugger
+        
 
             window.sessionStorage.setItem("bidderprofile",false)
             var profile = {email : bidderprofileemail}
-            debugger
+            
             axios.post('http://localhost:3001/profilefetch', profile)
             .then(res => {
-                debugger
+                
                 this.setState({
                     name : res.data.rows.name, 
                     username: res.data.rows.username,

@@ -9,41 +9,44 @@ import axios from 'axios';
 class DisplayProjectDetails extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {}
+        this.state = {profile_image : null}
         this.handleClick = this.handleClick.bind(this);
         this.handleLinkClick = this.handleLinkClick.bind(this);
     }
+    componentWillMount(){
+        var project_details = {email : this.props.bidder_email}
+        axios.post('http://localhost:3001/profilefetch',project_details)
+        .then(res => {
+            this.setState({
+                profile_image : res.data.rows.profile_image
+            })
+        });
+    }
     handleLinkClick(e){
         e.preventDefault();
-        // debugger
-        // var profile = {username :this.props.bidder_name}
-        // axios.post('http://localhost:3001/bidderfetch',profile)
-        // .then(res => {
-            debugger
             window.sessionStorage.setItem("bidderprofileemail", this.props.bidder_email)
-            debugger
             window.sessionStorage.setItem("bidderprofile", true)
             window.location.href = "http://localhost:3000/Profile"
-        // });
     }
     handleClick(e){
-        console.log(window.sessionStorage.getItem("project_id"))
         var bidder_name = {bidder_email : e.target.value, bidder_name : this.props.bidder_name, project_id : window.sessionStorage.getItem("project_id")}
         axios.post('http://localhost:3001/hirebidder',bidder_name)
         .then(res => {
-            debugger
-            window.location.href = "http://localhost:3000/adminaction"
+            if(res.data.bidder_hired) window.location.href = "http://localhost:3000/adminaction"
+            else{
+                alert("You already hired a bidder for your project");
+            }
         });
     }
 	render(){
         return (
             <tr >
-            {/* <td >{this.props.bid_id}</td> */}
-            <td ><a href="/" style={{color:'#29B3FE'}} onClick = {this.handleLinkClick}>{this.props.bidder_name}</a></td>
-            <td >{this.props.days}</td>
-            <td >{this.props.usd}</td>
-            <td >{this.props.bidder_email}</td>
-            <button className="login100-form-btn-bid" value  = {this.props.bidder_email} onClick = {this.handleClick}>Hire Bidder</button> 
+            <td ><img  src = {(this.state.profile_image) === null ? require("../images/avatar.gif") : require("../images/" + this.state.profile_image)}   style={{width: 80, height: 80}} alt = "Not Uploaded Yet"/></td>
+            <td style={{paddingTop:40}}><a href="/" style={{color:'#29B3FE'}} onClick = {this.handleLinkClick}>{this.props.bidder_name}</a></td>
+            <td style={{paddingTop:40}}>{this.props.days}</td>
+            <td style={{paddingTop:40}}>{this.props.usd}</td>
+            <td style={{paddingTop:40}}>{this.props.bidder_email}</td>
+            <button className="login100-form-btn-bid hiring-button" value  = {this.props.bidder_email} onClick = {this.handleClick}>Hire Bidder</button> 
             </tr>
         )
     }

@@ -18,13 +18,26 @@ class Payment extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {card_number : null, expiry_date : null, cvv : null, name_on_card:null, amount:null, invalid:true}
+        this.state = {balance : null,card_number : null, expiry_date : null, cvv : null, name_on_card:null, amount:null, invalid:true, bank_account : null, routing_number : null}
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleNumberChange = this.handleNumberChange.bind(this)
         this.handleExpiryDate = this.handleExpiryDate.bind(this)
         this.handleCvv = this.handleCvv.bind(this)
         this.handleName = this.handleName.bind(this)
         this.handleAmount = this.handleAmount.bind(this)
+        this.handleBankAccount = this.handleBankAccount.bind(this)
+        this.handleWithdraw = this.handleWithdraw.bind(this)
+        this.handleRoutingNumber = this.handleRoutingNumber.bind(this)
+        this.handleDebitAmount = this.handleDebitAmount.bind(this)
+    }
+    componentWillMount(){
+        var profile = {email : window.sessionStorage.getItem("email")}
+        axios.post('http://localhost:3001/profilefetch',profile)
+        .then(res => {
+            this.setState({
+                balance : res.data.rows.balance
+            })
+        });
     }
     handleNumberChange(e){
         debugger
@@ -103,10 +116,26 @@ class Payment extends React.Component{
 
         })
     }
-
+    handleBankAccount(e){
+        e.preventDefault();
+        this.setState({
+            bank_account : e.target.value
+        })
+    }
+    handleRoutingNumber(e){
+        e.preventDefault();
+        this.setState({
+            routing_number : e.target.value
+        })
+    }
+    handleDebitAmount(e){
+        e.preventDefault();
+        this.setState({
+            amount : e.target.value
+        })
+    }
     handleSubmit(e){
         e.preventDefault();
-        debugger
         if(!this.state.invalid && (this.state.name_on_card!== null && this.state.cvv!== null && this.state.expiry_date!== null && this.state.amount!== null && this.state.card_number!== null)){
             document.getElementById('alert').innerHTML = ""
             document.getElementById('alert').className = ""
@@ -114,12 +143,33 @@ class Payment extends React.Component{
 
             axios.post('http://localhost:3001/balanceupdate',update_data)
             .then(res => {
-                debugger
-                var data_inserted = res.data.image_updated;
+                
+                var data_inserted = res.data.data_inserted;
+                if(data_inserted){
+                    alert('update successful');
+                    window.sessionStorage.setItem("bidder_email", window.sessionStorage.getItem("email"))
+                    }
+                    window.location.href = "http://localhost:3000/Profile"
+                    // this.props.history.push('/Profile');
+                }
+            );
+        }else{
+            document.getElementById('alert').innerHTML = "ENTER VALID CARD DETAILS"
+            document.getElementById('alert').className = "alert alert-danger"
+        }
+    }
+    handleWithdraw(e){
+        e.preventDefault();
+        if(this.state.bank_account !== null || this.state.routing_number !== null || this.state.amount !== null){
+            console.log("-"+this.state.amount)
+            var update_data = {email : window.sessionStorage.getItem("email"), bank_account :this.state.bank_account , routing_number : this.state.routing_number, amount : "-"+this.state.amount }
+        
+            axios.post('http://localhost:3001/withdrawbalance',update_data)
+            .then(res => {
+                var data_inserted = res.data.data_inserted;
                 if(data_inserted){
                     alert('update successful');
                     }
-                    this.setState({updateimage : false})
                     window.location.href = "http://localhost:3000/Profile"
                     // this.props.history.push('/Profile');
                 }
@@ -131,86 +181,126 @@ class Payment extends React.Component{
     }
 
 
-
 	render(){
 
         
         debugger
         if(window.sessionStorage.getItem("logged_in")){
             return(
-            <div >
-                <div class="container-credit_card">
-    <div class="row">
-        <div class="col-md-4 offset-md-4">
-            <div class="card card-block">
-                <h3 class="text-xs-center">Add Money</h3>
-                <p id="alert" ></p>
-                <div style={{marginTop:10, marginBottom:10}}>
-                <img src={require("../images/visa.png")} style={{width: 60, height: 30}} alt = "Not Uploaded Yet"/>
-                <img src={require("../images/mc.png")} style={{width: 50, height: 30}} alt = "Not Uploaded Yet"/>
-                <img src={require("../images/diners.png")} style={{width: 100, height: 30, marginLeft:2}} alt = "Not Uploaded Yet"/>
-                <img src={require("../images/amex.png")} style={{width: 60, height: 30}} alt = "Not Uploaded Yet"/>
-                <img src={require("../images/discover.png")} style={{width: 95, height: 20}} alt = "Not Uploaded Yet"/>
-                <img src={require("../images/jcb.png")} style={{width: 60, height: 30}} alt = "Not Uploaded Yet"/>
-                </div>
-               
-                <fieldset>
-                    <div class="form-group">
-                        {/* <label>Card Number</label> */}
-                        <input maxLength = "16" onChange = {this.handleNumberChange} placeholder= "1234 5678 0987 6543" type="text" class="form-control" autocomplete="off" pattern="\d{16}" title="Credit card number" required=""/>
-                        <p id="card_number" style={{color:'red', marginBottom:5}}></p>
-                    </div>
-                    <div class="form-group row">
-                        {/* <label class="col-md-12">Card Expiry Date</label> */}
-                        <div class="col-md-4">
-                            <input class="form-control" onChange = {this.handleExpiryDate} type="text" maxLength="5" placeholder="MM/YY"/>
-                            <p id="date" style={{color:'red', marginBottom:5}}></p>
-                            
+                <div>
+                    <div  >
+                        <div class="row login100-form-title p-b-51" style={{marginTop:80}}>
+                            Balance
                         </div>
-                        <div class="col-md-4">
-                            <input type="text" onChange = {this.handleCvv} class="form-control" autocomplete="off" maxlength="4" pattern="\d{3}" title="Three digits at back of your card" required="" placeholder="CVC / CVV"/>
-                            <p id="cvv" style={{color:'red', marginBottom:5}}></p>
-                        </div>
-                        <div>
-                        <img src={require("../images/cvv1.png")} style={{width: 65, height: 40}} alt = "Not Uploaded Yet"/>
+                        <div class="row login100-form-title p-b-51" >
+                            $ {this.state.balance}
                         </div>
                     </div>
-                    <div class="form-group">
-                        {/* <label for="cc_name">Card Holder's Name</label> */}
-                        <input onChange = {this.handleName} placeholder= "Card Holder Name" type="text" class="form-control" id="cc_name" pattern="\w+ \w+.*" title="First and last name" required="required"/>
-                        <p id="name" style={{color:'red', marginBottom:5}}></p>
-                    </div>
+                    <div style={{float:"left", width:600}}>
+                    <div class="container-credit_card" >
+                    <div class="row">
+                        <div class="col-md-80 offset-md-2">
+                            <div class="card card-block">
+                                <h3 class="text-xs-center">Add Money</h3>
+                                <p id="alert" ></p>
+                                <div style={{marginTop:50, marginBottom:10}}>
+                                <img src={require("../images/visa.png")} style={{width: 60, height: 30}} alt = "Not Uploaded Yet"/>
+                                <img src={require("../images/mc.png")} style={{width: 50, height: 30, marginLeft:4}} alt = "Not Uploaded Yet"/>
+                                <img src={require("../images/diners.png")} style={{width: 100, height: 30, marginLeft:5}} alt = "Not Uploaded Yet"/>
+                                <img src={require("../images/amex.png")} style={{width: 60, height: 30, marginLeft:5}} alt = "Not Uploaded Yet"/>
+                                <img src={require("../images/discover.png")} style={{width: 115, height: 20, marginLeft:8}} alt = "Not Uploaded Yet"/>
+                                <img src={require("../images/jcb.png")} style={{width: 60, height: 30, marginLeft:7}} alt = "Not Uploaded Yet"/>
+                                </div>
 
-                    <div class="form-inline">
-                        <div class="input-group">
-                          {/* <div class="input-group-addon">$ </div> */}
-                          <input type="number" onChange = {this.handleAmount} class="form-control" id="exampleInputAmount" placeholder="00.00"/>
-                          <p id="amount" style={{color:'red', marginBottom:5}}></p>
-                          <div class="input-group-addon">Dollars </div>
-                          {/* <div class="input-group-addon">.00</div> */}
+                                <fieldset>
+                                    <div class="form-group">
+                                        {/* <label>Card Number</label> */}
+                                        <input maxLength = "16" onChange = {this.handleNumberChange} placeholder= "1234 5678 0987 6543" type="text" class="form-control" autocomplete="off" pattern="\d{16}" title="Credit card number" required=""/>
+                                        <p id="card_number" style={{color:'red', marginBottom:5}}></p>
+                                    </div>
+                                    <div class="form-group row">
+                                        {/* <label class="col-md-12">Card Expiry Date</label> */}
+                                        <div class="col-md-4">
+                                            <input class="form-control" onChange = {this.handleExpiryDate} type="text" maxLength="5" placeholder="MM/YY"/>
+                                            <p id="date" style={{color:'red', marginBottom:5}}></p>
+                                            
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" onChange = {this.handleCvv} class="form-control" autocomplete="off" maxlength="4" pattern="\d{3}" title="Three digits at back of your card" required="" placeholder="CVC / CVV"/>
+                                            <p id="cvv" style={{color:'red', marginBottom:5}}></p>
+                                        </div>
+                                        <div>
+                                        <img src={require("../images/cvv1.png")} style={{width: 65, height: 40}} alt = "Not Uploaded Yet"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        {/* <label for="cc_name">Card Holder's Name</label> */}
+                                        <input onChange = {this.handleName} placeholder= "Card Holder Name" type="text" class="form-control" id="cc_name" pattern="\w+ \w+.*" title="First and last name" required="required"/>
+                                        <p id="name" style={{color:'red', marginBottom:5}}></p>
+                                    </div>
+
+                                    <div class="form-inline">
+                                        <div class="input-group">
+                                        {/* <div class="input-group-addon">$ </div> */}
+                                        <input type="number" onChange = {this.handleAmount} class="form-control" id="exampleInputAmount" placeholder="00.00"/>
+                                        <p id="amount" style={{color:'red', marginBottom:5}}></p>
+                                        <div class="input-group-addon">Dollars </div>
+                                        {/* <div class="input-group-addon">.00</div> */}
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-6">
+                                            <button type="button" class="btn btn-cancel btn-block">Cancel</button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button type="submit" class="btn btn-submit btn-block" onClick = {this.handleSubmit}>Submit</button>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <div class="col-md-6">
-                            <button type="button" class="btn btn-cancel btn-block">Cancel</button>
-                        </div>
-                        <div class="col-md-6">
-                            <button type="submit" class="btn btn-submit btn-block" onClick = {this.handleSubmit}>Submit</button>
+                </div>
+            </div>
+
+            <div class="container-credit_card1">
+                <div class="row">
+                    <div class="col-md-80 offset-md-4">
+                        <div class="card card-block">
+                            <h3 class="text-xs-center">Withdraw Money</h3>
+                            <p id="alert" ></p>
+                            <fieldset>
+                                <div class="form-group">
+                                    <input maxLength = "16" onChange = {this.handleBankAccount} placeholder= "Bank Account Number" type="text" class="form-control" autocomplete="off" pattern="\d{16}" title="Credit card number" required=""/>
+                                    {/* <p id="card_number" style={{color:'red', marginBottom:5}}></p> */}
+                                </div>
+                                <div class="form-group">
+                                    <input maxLength = "16" onChange = {this.handleRoutingNumber} placeholder= "Routing Number" type="text" class="form-control" autocomplete="off" pattern="\d{16}" title="Credit card number" required=""/>
+                                    {/* <p id="card_number" style={{color:'red', marginBottom:5}}></p> */}
+                                </div>
+                                
+
+                                <div class="form-inline">
+                                    <div class="input-group">
+                                    <input type="number" onChange = {this.handleDebitAmount} class="form-control" id="exampleInputAmount" placeholder="00.00"/>
+                                    {/* <p id="amount" style={{color:'red', marginBottom:5}}></p> */}
+                                    <div class="input-group-addon">Dollars </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-6">
+                                        <button type="button" class="btn btn-cancel btn-block">Cancel</button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-submit btn-block" onClick = {this.handleWithdraw}>Submit</button>
+                                    </div>
+                                </div>
+                            </fieldset>
                         </div>
                     </div>
-                </fieldset>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
-                {/* <center >
-                    <div class="credit_card">
-                        <input class= "card_number" type="text" placeholder = "1234-5678-9009-8765"/>
-                    </div>
-                </center> */}
-            </div>
-            // </div>
 )   
         } else{
             return(window.location.href = "http://localhost:3000")

@@ -19,7 +19,7 @@ class DashBoard extends React.Component{
     }
 
     componentWillMount() {
-        debugger
+        
         var project_details = { project_id : window.sessionStorage.getItem("project_id")}
         // var bidder_details = { project_id : window.sessionStorage.getItem("project_id")}
         axios.post('http://localhost:3001/projectfetch',project_details)
@@ -49,7 +49,7 @@ class DashBoard extends React.Component{
         var project_list = <DisplayProjects project_id = {this.state.project_id}  title = {this.state.title} description = {this.state.description} skills_required = {this.state.skills} budget_range = {this.state.budget_range} total_bids = {this.state.total_bids} hired_bidder = {this.state.hired_bidder} status = {this.state.status}/>
         var bidderlist= this.state.bidders_list.map( data => { 
             return(
-            <BiddersList bid_id = {data.bid_id}  days = {data.days} usd = {data.usd} bidder_name = {data.bidder_name}  bidder_email = {data.bidder_email} />
+            <BiddersList bid_id = {data.bid_id} days = {data.days} usd = {data.usd} bidder_name = {data.bidder_name}  bidder_email = {data.bidder_email} />
             )
         })
 
@@ -65,6 +65,7 @@ class DashBoard extends React.Component{
                             <th>Budget Range</th>
                             <th>Hired Bidder</th>
                             <th>Project Status</th>
+                            <th>Average Bids</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,6 +75,7 @@ class DashBoard extends React.Component{
                     <table className="table">
                         <thead>
                             <tr >
+                            <th>Profile Image</th>
                             <th>Bidder Name</th>
                             <th>Days</th>
                             <th>USD/hour</th>

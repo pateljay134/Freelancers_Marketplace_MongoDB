@@ -16,10 +16,10 @@ class ProfileDetails extends React.Component{
     }
     componentWillMount() {
             var profile = {email : window.sessionStorage.getItem("email")}
-            debugger
+            
             axios.post('http://localhost:3001/profilefetch', profile)
             .then(res => {
-                debugger
+                
                 // console.log(res.data.rows)
                 this.setState({
                     name : res.data.rows.name, 
@@ -74,7 +74,7 @@ class ProfileDetails extends React.Component{
         var val = {name: this.state.name, email: this.state.email, phone_number: this.state.phone_number, skills: this.state.skills, about_me: this.state.about_me}
         axios.post('http://localhost:3001/profileupdate', val)
         .then(res => {
-            debugger
+            
             var data_inserted = res.data.data_inserted;
             if(data_inserted){
                 alert('update successful');
@@ -86,7 +86,7 @@ class ProfileDetails extends React.Component{
     }
 
 	render(){
-        debugger
+        
         if(window.sessionStorage.getItem("bidderprofile")==="true"){
 
 		return(
@@ -125,7 +125,9 @@ class ProfileDetails extends React.Component{
         )
     }else{
         return(
-            <form method = "POST" className="login100-form validate-form flex-sb flex-w">
+            <div>
+                   
+                    <form method = "POST" className="login100-form validate-form flex-sb flex-w">
 					        {/* <span className="login100-form-title p-b-51"> Profile </span> */}
                             Name : <div className="wrap-input100 validate-input m-b-16" data-validate = "Name is required">
 						        <input className="input100" type="text" name="Name"  placeholder={this.state.name }  />
@@ -157,7 +159,8 @@ class ProfileDetails extends React.Component{
                             </div>
 
 				        </form>
-                        
+
+            </div>
         )
     }
     }

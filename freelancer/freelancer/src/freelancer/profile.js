@@ -15,8 +15,16 @@ import BidderProfileImage from './bidderprofileimage';
 //import { debug } from 'util';
 
 class Profile extends React.Component{
+    constructor(props){
+        super(props);
+        this.viewBalance = this.viewBalance.bind(this);
+    }
+    viewBalance(e){
+        e.preventDefault();
+        window.location.href = "http://localhost:3000/payment"
+    }
 	render(){
-        debugger
+        
         if(window.sessionStorage.getItem("logged_in")){
             if(window.sessionStorage.getItem("bidderprofile")==="true"){
             return(
@@ -37,9 +45,15 @@ class Profile extends React.Component{
                         <div className="wrap-login100 p-t-50 p-b-90">
                         <span className="login100-form-title p-b-51"> Profile </span>
                             <ProfileImage/>
+                            
                             <ProfileDetails/>
                         </div>
+
                     </div>
+
+                        <button className="txt1 txt2" onClick={this.viewBalance}>
+                            View Balance
+                        </button>
                 </div>
             )}
     } else{

@@ -137,6 +137,9 @@ iframe {
 
 .container-credit_card{
   padding: 15px;
+}
+.container-credit_card1{
+  padding: 15px;
   margin-top: 10%;
 }
 .card{
@@ -416,7 +419,7 @@ iframe {
   /* color: #000000; */
   line-height: 1.2;
   text-transform: uppercase;
-
+  
   display: -webkit-box;
   display: -webkit-flex;
   display: -moz-box;
@@ -435,6 +438,9 @@ iframe {
   -o-transition: all 0.4s;
   -moz-transition: all 0.4s;
   transition: all 0.4s;
+}
+.hiring-button{
+  margin-top: 35px;
 }
 
 

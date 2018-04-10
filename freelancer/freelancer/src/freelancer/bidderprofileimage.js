@@ -14,18 +14,18 @@ class BidderProfileImage extends React.Component{
         window.sessionStorage.setItem("bidderprofile",false)
         axios.post('http://localhost:3001/profilefetch', profile)
         .then(res => {
-            debugger
+            
             console.log(res.data.rows)
                 this.setState({
                     image_name : res.data.rows.profile_image
                 })
         });
-        debugger
+        
     }
 
 	render(){
         if(this.state.image_name === null){
-            debugger
+            
             return(
                 <div>
                     <img src={require("../images/avatar.gif")} style={{width: 100, height: 120, marginLeft:145}} alt = "Not Uploaded Yet"/>

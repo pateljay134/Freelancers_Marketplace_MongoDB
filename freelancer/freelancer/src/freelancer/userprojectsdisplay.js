@@ -28,7 +28,7 @@ class UserProjectsDisplay extends React.Component{
         window.location.href = "http://localhost:3000/adminaction"
     }
     handleAdminLinkClick(e){
-        debugger
+        
         window.sessionStorage.setItem("project_id",this.props.project_id );
         window.sessionStorage.setItem("isAdmin",true);
         window.sessionStorage.setItem("logged_in",true);
@@ -57,7 +57,7 @@ class UserProjectsDisplay extends React.Component{
             <td >{this.props.description}</td>
             <td >{this.props.skills_required}</td>
             {/* <td >{this.props.employer}</td> */}
-            <td >$0 - {this.props.budget_range}</td> 
+            <td >$ {this.props.budget_range}</td> 
             <td >{this.state.total_bids}</td> 
             <td>{this.props.status}</td>
             <button className="login100-form-btn-bid" value  = {this.props.project_id} onClick = {this.handleClick}>View Bidders</button>

@@ -18,16 +18,16 @@ class AssignProject extends React.Component{
     }
 
     componentWillMount() {
-        debugger
+        
         var profile = {username : window.sessionStorage.getItem("username")}
         axios.post('http://localhost:3001/userprojects', profile)
         .then(res => {
-            debugger
+            
             this.setState({
                 projects : res.data.rows
             })
         });
-        debugger
+        
     }
 
 	render(){

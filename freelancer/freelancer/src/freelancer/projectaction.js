@@ -39,7 +39,7 @@ class ProjectAction extends React.Component{
         var val = {project_data : project_data, project_id : window.sessionStorage.getItem("project_id"), days: this.state.days, usd : this.state.usd, employer : this.state.employer, bidder_email: window.sessionStorage.getItem("email"), bidder_name: window.sessionStorage.getItem("name")}
         axios.post('http://localhost:3001/addbid', val)
         .then(res => {
-            debugger
+            
             var bid_added = res.data.bid_added;
             if(bid_added){
                 window.location.href = 'http://localhost:3000/Dashboard';
@@ -60,9 +60,9 @@ class ProjectAction extends React.Component{
     }
 
     componentDidMount() {
-        debugger
+        
         var project_details = { project_id : window.sessionStorage.getItem("project_id")}
-        debugger
+        
         axios.post('http://localhost:3001/projectfetch', project_details)
         .then(res => {
             this.setState({

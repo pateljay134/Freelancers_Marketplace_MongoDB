@@ -50,7 +50,7 @@ class SignIn extends React.Component{
                         window.sessionStorage.setItem("logged_in",logged_in)
                         window.sessionStorage.setItem("email", this.state.email);
                         window.sessionStorage.setItem("name", res.data.result);
-                        debugger
+                        
                         window.location.href = "http://localhost:3000/"
                     }else{
                         document.getElementById('email').innerHTML = "This email exists already"
@@ -61,7 +61,7 @@ class SignIn extends React.Component{
  
     }
 	render(){
-        debugger
+        
         if(window.sessionStorage.getItem("logged_in") || window.sessionStorage.logged_in===undefined){
 		return(
         // <Provider store = {store}>

@@ -14,7 +14,7 @@ import './css/one-page-wonder.min.css';
 
 class WorkSpot extends React.Component{
 	render(){
-        debugger
+        
         if(window.sessionStorage.logged_in === "true"){
 		return(
             <div className="limiter">

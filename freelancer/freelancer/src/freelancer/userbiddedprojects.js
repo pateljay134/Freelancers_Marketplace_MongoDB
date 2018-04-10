@@ -17,6 +17,7 @@ class UserBiddedProjects extends React.Component{
     constructor(props) {
         super(props);
         this.state = {average_days:null}
+        this.handleLinkClick = this.handleLinkClick.bind(this)
     }
     componentDidMount() {
         if(this.props.project_id !== null){
@@ -29,13 +30,22 @@ class UserBiddedProjects extends React.Component{
         });
         }
     }
+    handleLinkClick(e){
+        
+        e.preventDefault();
+        window.sessionStorage.setItem("project_id",this.props.project_id);
+        window.sessionStorage.setItem("logged_in",true);
+        window.location.href = "http://localhost:3000/addbid"
+        // });
+    }
 	render(){
         
         return (
             // this.state.bid_on_project ? passwordPage : displayprojects 
            <tr >
             {/* <td >{this.props.bid_id}</td> */}
-            <td >{this.props.project_name}</td>
+            <td ><a href="/AddBid" style={{color:"#29B3FE"}} value  = {this.props.project_id} onClick = {this.handleLinkClick}>{this.props.project_name}</a></td>
+            {/* <td >{this.props.project_id}</td> */}
             <td >{this.props.employer}</td>
             <td >{this.props.days}</td>
             <td >{this.props.usd}</td>
