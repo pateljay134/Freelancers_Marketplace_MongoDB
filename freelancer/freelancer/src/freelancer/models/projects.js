@@ -11,7 +11,8 @@ var projects = new Schema({
  hiredbidder : { type : String, default : null},
  hiredbiddername : { type : String, default : null},
  status : { type : String, default : "PENDING"},
- file : { type : String, default : null}
+ file : { type : String, default : null},
+ progress : {type : Object}
 });
 
 module.exports = mongoose.model('projects', projects);

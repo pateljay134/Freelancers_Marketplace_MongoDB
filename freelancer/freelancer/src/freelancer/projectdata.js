@@ -12,7 +12,7 @@ import './css/one-page-wonder.min.css';
 class ProjectData extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {average_days:null, days: null, usd: null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
+        this.state = {hired_bidder : null,average_days:null, days: null, usd: null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
     }
     componentDidMount() {
         var project_details = { project_id : window.sessionStorage.getItem("project_id")}
@@ -25,7 +25,8 @@ class ProjectData extends React.Component{
                 description : res.data.rows.description,
                 skills : res.data.rows.skills_required,
                 budget_range : res.data.rows.budget_range,
-                average_days : res.data.result
+                average_days : res.data.result,
+                hired_bidder : res.data.rows.hiredbidder
             })
         });
     }

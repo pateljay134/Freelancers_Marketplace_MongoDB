@@ -361,7 +361,8 @@ app.post('/projectsfetch', function(req, res) {
   mongoose.connect(url, function(err, db) {
     if (err) res.json({logged_in:false})
     else{
-      db.collection("projects").find().toArray(function(err, rows){
+      console.log(req.body.sort)
+      db.collection("projects").find().sort({ budget_range: req.body.sort }).toArray(function(err, rows){
         if(!err){
                       // db.collection("projects").find().toArray(function(err, rows){
                       //   if(!err){
@@ -584,6 +585,43 @@ app.post('/addbid', function(req, res) {
   });
 
 });
+
+app.post('/projectprogress', function(req, res) {
+  var project  = new projects;
+  let form = new multiparty.Form();
+  form.parse(req, (err, fields, files) => {
+  let { path: tempPath, originalFilename } = files.file[0];
+  var fileType = originalFilename.split(".");
+  var fileName = Date.now() + '.' + fileType[fileType.length - 1]
+
+
+    mongoose.connect(url, function(err, db) {
+    if (err) throw err;
+    else{
+      console.log("Hello")
+      console.log(fields.project_id[0])
+      console.log(fields.comment[0])
+      console.log(fields.hired_bidder[0])
+      var myobj = { project_id : fields.project_id[0], comment : fields.comment[0], bidder_email : fields.hired_bidder[0], filename : fileName};
+      db.collection("projects").update(
+        { project_id : fields.project_id[0] },
+        { $push: { progress : myobj} }
+      )
+      let copyToPath = "./src/files/" + fileName;
+            fs.readFile(tempPath, (err, data) => {
+              if (err) throw err;
+              fs.writeFile(copyToPath, data, (err) => {
+                if (err) throw err;
+                fs.unlink(tempPath, () => {
+                });
+                res.json({progress_added : true});
+              });
+            });
+    }
+    });
+  })
+});
+
 
 app.post('/balanceupdate', function(req, res) {
   mongoose.connect(url, function(err, db) {

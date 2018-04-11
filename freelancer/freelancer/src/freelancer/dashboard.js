@@ -13,13 +13,16 @@ import './css/one-page-wonder.min.css';
 class DashBoard extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {projects : [],average_days:null, project_id : null, total_bids : null, current_page : 1, rows_per_page : 10}
+        this.state = {sort : 1, projects : [],average_days:null, project_id : null, total_bids : null, current_page : 1, rows_per_page : 10}
         this.handleChange = this.handleChange.bind(this)
         this.handlePageChange = this.handlePageChange.bind(this)
+        this.handleSort = this.handleSort.bind(this)
     }
 
     componentDidMount() {
-        axios.post('http://localhost:3001/projectsfetch')
+        var sort = {sort : 1}
+        console.log(1)
+        axios.post('http://localhost:3001/projectsfetch', sort)
         .then(res => {
             console.log(res.data)
             this.setState({
@@ -47,6 +50,29 @@ class DashBoard extends React.Component{
     
         //     }
 
+    }
+    handleSort(e){
+        e.preventDefault();
+        debugger
+        if(this.state.sort === 1){
+            this.setState({
+                sort : -1
+            })
+        }else{
+            this.setState({
+                sort : 1
+            })
+        }
+        debugger
+        var sort = {sort : this.state.sort}
+        console.log(sort)
+        axios.post('http://localhost:3001/projectsfetch', sort)
+        .then(res => {
+            console.log(res.data)
+            this.setState({
+                projects : res.data.rows
+            })
+        });
     }
 
     handleChange(e){
@@ -125,7 +151,7 @@ class DashBoard extends React.Component{
                             <th>Description</th>
                             <th>Skills Required</th>
                             <th>Employer</th>
-                            <th>Budget Range</th>
+                            <th style= {{width : 95}}><a class = "rangesort" href="/" onClick = {this.handleSort}>Budget Range ⇅</a></th>
                             <th>Project Status</th>
                             <th>Average Days</th>
 

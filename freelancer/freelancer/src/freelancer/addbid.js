@@ -18,10 +18,13 @@ import './css/one-page-wonder.min.css';
 class AddBid extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {days: null, usd: null, hired_bidder : null, status : null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
+        this.state = {file: '', filename:null ,comment : null, days: null, usd: null, hired_bidder : null, status : null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleDays = this.handleDays.bind(this);
         this.handleUSD = this.handleUSD.bind(this);
+        this.handleProgress = this.handleProgress.bind(this);
+        this.handleComment = this.handleComment.bind(this);
+        this.handleFile = this.handleFile.bind(this);
     }
 
     handleSubmit(e){
@@ -76,16 +79,62 @@ class AddBid extends React.Component{
                 skills : res.data.rows.skills_required,
                 budget_range : res.data.rows.budget_range,
                 status : res.data.rows.status,
-                hired_bidder : res.data.rows.hired_bidder
-
+                hired_bidder : res.data.rows.hiredbidder
             })
         });
     }
+    handleComment(e){
+        e.preventDefault();
+        this.setState({
+            comment : e.target.value
+        })
+    }
+    handleFile(e){
+        e.preventDefault();
+        let reader = new FileReader();
+        let file = e.target.files[0];
+        reader.onloadend = () => {
+            this.setState({
+                file: file,
+            });
+        }
+        reader.readAsDataURL(file)
+    }
+    handleProgress(e){
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('file', this.state.file);
+        formData.append('id', 1);
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
+        }
+
+        var progress_added;
+        formData.append('comment', this.state.comment);
+        formData.append('project_id', this.state.project_id);
+        formData.append('hired_bidder', this.state.hired_bidder);
+
+        axios.post('http://localhost:3001/projectprogress', formData,config)
+        .then(res => {
+            progress_added= res.data.project_added
+            if(progress_added){
+                alert("progress added")
+                window.location.href = "http://localhost:3000/workspot"
+            }
+            // window.location.href = "http://localhost:3000/Profile"
+            // this.props.history.push('/addproject');
+        })
+    }
+
+
 
 	render(){
+        debugger
         if(window.sessionStorage.getItem("logged_in") === "true"){
 
-            if(this.state.employer !== window.sessionStorage.getItem("email")){
+            if(this.state.employer !== window.sessionStorage.getItem("email") && this.state.hired_bidder !== window.sessionStorage.getItem("email")){
                 return(
                     <div className="limiter">
                         <div className="container-login100">
@@ -104,7 +153,7 @@ class AddBid extends React.Component{
                                     </div>
 
                                     <div className="container-login100-form-btn m-t-17">
-                                        <input type="submit" className="login100-form-btn" value="Submit Bid" onClick = {this.handleSubmit}/>
+                                        <input type="submit" className="login100-form-btn" value="Submit Bid" onClick = {this.handleProgress}/>
                                     </div>
 
                                 </form>
@@ -124,13 +173,20 @@ class AddBid extends React.Component{
         
                                 </form>
                                 <form>
+                                <div className="validate-input m-b-16" >
+                                    Note: You are hired for this project. Give your input
+                                </div>
                                 <div className="input100" data-validate = "File is required">
                                     <input type="file" onChange={this.handleFile} className="input100" style = {{marginTop:10}}/><br />
                                 </div>
                                 <div className="wrap-input100 validate-input m-b-16" data-validate = "Add Comments">
-                                    <input className="input100" type="text" name="comment-box" required onChange = {this.handleName.bind(this)} placeholder="Add Comments" />
+                                    <input className="input100" type="text" name="comment-box" required onChange = {this.handleComment} placeholder="Add Comments" />
                                     <span className="focus-input100"></span>
 					            </div>
+                                {/* <button className="login100-form-btn-bid" style={{width:"100%"}} value  = {this.props.project_id} onClick = {this.handleClick}>Submit Project Progress</button> */}
+                                <div className="container-login100-form-btn m-t-17">
+                                    <input type="submit" className="login100-form-btn" value="Add Project Progress" onClick = {this.handleProgress}/>
+                                </div>
                                 </form>
                             </div>
                         </div>
