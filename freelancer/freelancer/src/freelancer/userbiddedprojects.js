@@ -16,10 +16,11 @@ import './css/one-page-wonder.min.css';
 class UserBiddedProjects extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {average_days:null}
+        this.state = {average_days:null, session_exist:null}
         this.handleLinkClick = this.handleLinkClick.bind(this)
     }
     componentDidMount() {
+
         if(this.props.project_id !== null){
         var project_details = { project_id : this.props.project_id}
         axios.post('http://localhost:3001/projectfetch', project_details)

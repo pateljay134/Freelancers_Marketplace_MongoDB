@@ -18,12 +18,14 @@ class MakePayment extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {card_number : null, expiry_date : null, cvv : null, name_on_card:null, amount:null, invalid:true, bank_account : null, routing_number : null}
+        this.state = {session_exist:null, card_number : null, expiry_date : null, cvv : null, name_on_card:null, amount:null, invalid:true, bank_account : null, routing_number : null}
         this.handleBankAccount = this.handleBankAccount.bind(this)
         this.handleTransfer = this.handleTransfer.bind(this)
         this.handleRoutingNumber = this.handleRoutingNumber.bind(this)
         this.handleDebitAmount = this.handleDebitAmount.bind(this)
     }
+
+
     handleBankAccount(e){
         e.preventDefault();
         this.setState({

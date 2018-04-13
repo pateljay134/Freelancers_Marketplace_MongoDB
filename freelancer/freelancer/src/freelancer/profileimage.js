@@ -7,13 +7,14 @@ import axios from 'axios';
 class ProfileImage extends React.Component{
 	constructor(props) {
         super(props);
-        this.state = { file: '', updateimage: false, image_name : null };
+        this.state = { file: '', updateimage: false, image_name : null, session_exist : null };
         this.handleImage = this.handleImage.bind(this);
         this.handleImageUpdation = this.handleImageUpdation.bind(this);
         this.handleImageUploading = this.handleImageUploading.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
     }
     componentWillMount() {
+
         var profile
         var self=this
         // console.log(window.sessionStorage.getItem("email"))
@@ -33,6 +34,7 @@ class ProfileImage extends React.Component{
             }
         });
         }else{
+            debugger
             profile = {email : window.sessionStorage.getItem("email")}
             axios.post('http://localhost:3001/profilefetch', profile)
             .then(res => {
@@ -136,8 +138,8 @@ class ProfileImage extends React.Component{
                 </div>
             )
         }
-		
-	}
+    }
+	
 }
 
 export default ProfileImage; 

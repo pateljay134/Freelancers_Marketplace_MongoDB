@@ -12,9 +12,10 @@ import './css/one-page-wonder.min.css';
 class ProjectData extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {hired_bidder : null,average_days:null, days: null, usd: null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
+        this.state = {session_exist:null, hired_bidder : null,average_days:null, days: null, usd: null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
     }
     componentDidMount() {
+
         var project_details = { project_id : window.sessionStorage.getItem("project_id")}
         axios.post('http://localhost:3001/projectfetch', project_details)
         .then(res => {
@@ -32,8 +33,8 @@ class ProjectData extends React.Component{
     }
 
 	render(){
-        console.log(this.state);
-        if(window.sessionStorage.logged_in !== null){
+        
+        if(window.sessionStorage.getItem("logged_in")){
 		return(
             <div className="limiter">
                             Project Name : <div className="wrap-input100 validate-input m-b-16" >

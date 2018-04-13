@@ -15,11 +15,10 @@ import './css/one-page-wonder.min.css';
 class DashBoard extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {bidders_list : [],hired_bidder :null,status:null,project_id : null, title : null, description : null, skills : null, budget_range : null, total_bids : null}
+        this.state = {session_exist: null,bidders_list : [],hired_bidder :null,status:null,project_id : null, title : null, description : null, skills : null, budget_range : null, total_bids : null}
     }
 
     componentWillMount() {
-        
         var project_details = { project_id : window.sessionStorage.getItem("project_id")}
         // var bidder_details = { project_id : window.sessionStorage.getItem("project_id")}
         axios.post('http://localhost:3001/projectfetch',project_details)
@@ -53,7 +52,7 @@ class DashBoard extends React.Component{
             )
         })
 
-        if(window.sessionStorage.logged_in === "true"){
+        if(window.sessionStorage.getItem("logged_in")){
             return(
                 <div className="table">
                     <table className="table">

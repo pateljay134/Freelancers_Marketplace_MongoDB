@@ -18,7 +18,7 @@ import './css/one-page-wonder.min.css';
 class ProjectAction extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {days: null, usd: null, status : null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
+        this.state = {session_exist:true, days: null, usd: null, status : null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleDays = this.handleDays.bind(this);
         this.handleUSD = this.handleUSD.bind(this);
@@ -79,24 +79,25 @@ class ProjectAction extends React.Component{
     }
 
 	render(){
-        if(window.sessionStorage.getItem("logged_in") === "true"){
+        if(window.sessionStorage.getItem("logged_in")){
 
             if(this.state.employer === window.sessionStorage.getItem("email")){
-		return(
-            <div className="limiter">
-		       
-            </div>
+		        return(
+                    <div className="limiter">
+                    
+                    </div>
            
-        )}else{
-            window.location.href = "http://localhost:3000/projectaction"
-        }
-    } else{
+            )}else{
+                window.location.href = "http://localhost:3000/projectaction"
+            }
+        } else{
 
-        console.log("Hello")
-        return(
+            console.log("Hello")
+            return(
             <AddBid/>
-        )
-    }}
+            )
+        }
+    }
 }
 
 export default ProjectAction;

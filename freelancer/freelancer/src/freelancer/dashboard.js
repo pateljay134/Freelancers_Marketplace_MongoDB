@@ -13,13 +13,26 @@ import './css/one-page-wonder.min.css';
 class DashBoard extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {sort : 1, projects : [],average_days:null, project_id : null, total_bids : null, current_page : 1, rows_per_page : 10}
+        this.state = {session_exist : null, sort : 1, projects : [],average_days:null, project_id : null, total_bids : null, current_page : 1, rows_per_page : 10}
         this.handleChange = this.handleChange.bind(this)
         this.handlePageChange = this.handlePageChange.bind(this)
         this.handleSort = this.handleSort.bind(this)
     }
 
-    componentDidMount() {
+    componentWillMount() {
+
+        axios.get('http://localhost:3001/checksession',{ withCredentials: true } )
+        .then(res => {
+            if(res.data.session_exist){
+                this.setState({
+                    session_exist : res.data.session_exist
+                })
+            }
+            else{
+                window.location.href = "http://localhost:3000";
+            }
+        });
+
         var sort = {sort : 1}
         console.log(1)
         axios.post('http://localhost:3001/projectsfetch', sort)
@@ -29,26 +42,6 @@ class DashBoard extends React.Component{
                 projects : res.data.rows
             })
         });
-        
-
-
-        // if(this.props.project_id !== null){
-        //     var project_details = { project_id : this.props.project_id}
-        //     axios.post('http://localhost:3001/projectfetch', project_details)
-        //     .then(res => {
-        //         this.setState({
-        //             average_days : res.data.result
-        //         })
-        //     });
-    
-        //     axios.post('http://localhost:3001/projectbidcount', project_details)
-        //     .then(res => {
-        //         this.setState({
-        //             total_bids : res.data.total_bids
-        //         })
-        //     });
-    
-        //     }
 
     }
     handleSort(e){
@@ -63,6 +56,7 @@ class DashBoard extends React.Component{
                 sort : 1
             })
         }
+        
         debugger
         var sort = {sort : this.state.sort}
         console.log(sort)
@@ -85,6 +79,7 @@ class DashBoard extends React.Component{
             })
         });
     }
+    
     handlePageChange(e){
         e.preventDefault();
         this.setState({
@@ -126,7 +121,7 @@ class DashBoard extends React.Component{
         }
 
 
-        if(window.sessionStorage.logged_in === "true"){
+        if(1===1){
             
             return(
                 <div className="table">

@@ -7,9 +7,10 @@ import axios from 'axios';
 class BidderProfileImage extends React.Component{
 	constructor(props) {
         super(props);
-        this.state = { image_name : null };
+        this.state = { image_name : null , session_exist:null};
     }
     componentWillMount() {
+
         var profile = {email : window.sessionStorage.getItem("bidderprofileemail")}
         window.sessionStorage.setItem("bidderprofile",false)
         axios.post('http://localhost:3001/profilefetch', profile)

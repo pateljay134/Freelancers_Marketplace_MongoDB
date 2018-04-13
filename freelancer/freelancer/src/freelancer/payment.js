@@ -18,7 +18,7 @@ class Payment extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {balance : null,card_number : null, expiry_date : null, cvv : null, name_on_card:null, amount:null, invalid:true, bank_account : null, routing_number : null}
+        this.state = {session_exist:null, balance : null,card_number : null, expiry_date : null, cvv : null, name_on_card:null, amount:null, invalid:true, bank_account : null, routing_number : null}
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleNumberChange = this.handleNumberChange.bind(this)
         this.handleExpiryDate = this.handleExpiryDate.bind(this)
@@ -31,6 +31,7 @@ class Payment extends React.Component{
         this.handleDebitAmount = this.handleDebitAmount.bind(this)
     }
     componentWillMount(){
+
         var profile = {email : window.sessionStorage.getItem("email")}
         axios.post('http://localhost:3001/profilefetch',profile)
         .then(res => {
@@ -301,7 +302,7 @@ class Payment extends React.Component{
                 </div>
             </div>
         </div>
-)   
+        )      
         } else{
             return(window.location.href = "http://localhost:3000")
         }

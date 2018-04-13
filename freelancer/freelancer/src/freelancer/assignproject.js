@@ -14,7 +14,7 @@ import './css/one-page-wonder.min.css';
 class AssignProject extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {projects : []}
+        this.state = {projects : [], session_exist: null}
     }
 
     componentWillMount() {
@@ -38,7 +38,7 @@ class AssignProject extends React.Component{
             )
         })
 
-        if(window.sessionStorage.logged_in === "true"){
+        if(window.sessionStorage.getItem("logged_in")){
             return(
                 <div className="table">
                 

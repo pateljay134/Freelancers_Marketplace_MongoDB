@@ -7,9 +7,10 @@ import axios from 'axios';
 class BidderProfileDetails extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {bidderprofile:null,bidderprofilename:null, name: null, username: null, phone_number: null, skills: null , about_me : null, password : null};
+        this.state = {session_exist:null, bidderprofile:null,bidderprofilename:null, name: null, username: null, phone_number: null, skills: null , about_me : null, password : null};
     }
     componentWillMount() {
+
         var bidderprofileemail = window.sessionStorage.getItem("bidderprofileemail")
         // var bidderprofile = window.sessionStorage.getItem("bidderprofile")
         

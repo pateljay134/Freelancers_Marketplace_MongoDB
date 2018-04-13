@@ -14,7 +14,7 @@ import './css/one-page-wonder.min.css';
 class UserProjects extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {projects : [], statuspending : "PENDING", statusongoing: "ON GOING", current_page : 1, rows_per_page : 10}
+        this.state = {session_exist:null, projects : [], statuspending : "PENDING", statusongoing: "ON GOING", current_page : 1, rows_per_page : 10}
         this.handleClick = this.handleClick.bind(this)
         this.handleAllProject = this.handleAllProject.bind(this)
         this.handleChange = this.handleChange.bind(this)
@@ -23,6 +23,16 @@ class UserProjects extends React.Component{
 
     componentWillMount() {
         
+        axios.get('http://localhost:3001/checksession',{ withCredentials: true } )
+        .then(res => {
+            if(res.data.session_exist){
+                debugger
+                this.setState({
+                    session_exist : res.data.session_exist
+                })
+            }
+        });
+
         var profile = {email : window.sessionStorage.getItem("email")}
         axios.post('http://localhost:3001/userprojects', profile)
         .then(res => {
@@ -73,31 +83,31 @@ class UserProjects extends React.Component{
         });
     }
 	render(){
-        if(this.state.projects === null){
-            <UserProjectsDisplay/>
-        }else{
-            console.log(this.state.projects)
-            const lastIndex = this.state.current_page * this.state.rows_per_page;
-            const firstIndex = lastIndex - this.state.rows_per_page;
-            const projects_to_show = this.state.projects.slice(firstIndex, lastIndex);
-            // const total_pages = this.state.projects.length > 0 ? this.state.projects.length/this.state.rows_per_page : 0;
-            const page_numbers = [];
-            for (let i = 1; i <= Math.ceil(this.state.projects.length / this.state.rows_per_page); i++) {
-                page_numbers.push(i);
-            }  
-            var pagination = page_numbers.map(number => {
-                return (
-                    <div style={{float : "left"}}><li class="pagination pagination-lg" key= {number} data-id={number} onClick={this.handlePageChange} ><a data-id={number} class="page-link" href="/">{number}</a></li></div>
-                );
-            });
-            var project_list = projects_to_show.map( data => { 
-            
-            return(
-            <UserProjectsDisplay project_id = {data.project_id}  title = {data.title} description = {data.description} skills_required = {data.skills_required} budget_range = {data.budget_range} total_bids = {data.total_bids} status = {data.status}/>
-            )
-        })
-    }
-        if(window.sessionStorage.logged_in === "true"){
+            if(this.state.projects === null){
+                <UserProjectsDisplay/>
+            }else{
+                console.log(this.state.projects)
+                const lastIndex = this.state.current_page * this.state.rows_per_page;
+                const firstIndex = lastIndex - this.state.rows_per_page;
+                const projects_to_show = this.state.projects.slice(firstIndex, lastIndex);
+                // const total_pages = this.state.projects.length > 0 ? this.state.projects.length/this.state.rows_per_page : 0;
+                const page_numbers = [];
+                for (let i = 1; i <= Math.ceil(this.state.projects.length / this.state.rows_per_page); i++) {
+                    page_numbers.push(i);
+                }  
+                var pagination = page_numbers.map(number => {
+                    return (
+                        <div style={{float : "left"}}><li class="pagination pagination-lg" key= {number} data-id={number} onClick={this.handlePageChange} ><a data-id={number} class="page-link" href="/">{number}</a></li></div>
+                    );
+                });
+                var project_list = projects_to_show.map( data => { 
+                
+                return(
+                <UserProjectsDisplay project_id = {data.project_id}  title = {data.title} description = {data.description} skills_required = {data.skills_required} budget_range = {data.budget_range} total_bids = {data.total_bids} status = {data.status}/>
+                )
+            })
+        }
+        if(window.sessionStorage.getItem("logged_in")){
             return(
                 <div className="table">
                     <input style={{width : "99%", marginLeft : 7, height:55, fontSize:25, borderColor : "black"}} class= "wrap-input100 m-b-5" type = "text" onChange= {this.handleChange} placeholder = "Search 🔍"/>

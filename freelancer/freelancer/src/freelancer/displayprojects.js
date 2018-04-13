@@ -10,7 +10,7 @@ import './css/one-page-wonder.min.css';
 class DisplayProjects extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {average_days:null, total_bids : null, project_id : null, project_bids_id : null}
+        this.state = {session_exist: null, average_days:null, total_bids : null, project_id : null, project_bids_id : null}
         this.handleClick = this.handleClick.bind(this);
         this.handleLinkClick = this.handleLinkClick.bind(this);
         this.handleAdminLinkClick = this.handleAdminLinkClick.bind(this);
@@ -18,7 +18,6 @@ class DisplayProjects extends React.Component{
         this.countDays = this.countDays.bind(this);
         this.countTotalBids = this.countTotalBids.bind(this);
     }
-
     countDays(){
         
             var project_details = { project_id : this.props.project_id}

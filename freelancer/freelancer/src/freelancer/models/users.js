@@ -9,7 +9,8 @@ var users = new Schema({
  skills : { type : String,default : null},
  about_me : { type : String, default : null},
  profile_image : { type : String, default : null},
- assigned_project_id: { type : Array },
+//  assigned_project_id: { type : Array },
+ assigned_project_id: { type : Array, default : [] },
  balance : {type : Number, default : 0},
  transaction : {type : String}
 });

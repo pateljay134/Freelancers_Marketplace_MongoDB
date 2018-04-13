@@ -5,7 +5,7 @@ import './css/main.css';
 import './css/util.css';
 import UserProjects from './userprojects';
 import UserBids from './userbids';
-// import axios from 'axios';
+import axios from 'axios';
 // import UserDetails from './userdetails';
 // import 'https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900';
 // import 'https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i';
@@ -13,20 +13,36 @@ import './css/one-page-wonder.min.css';
 //import { debug } from 'util';
 
 class WorkSpot extends React.Component{
+    constructor(props) {
+        super(props);
+        this.state = {session_exist : null};
+    }
+
+    componentWillMount(){
+        axios.get('http://localhost:3001/checksession',{ withCredentials: true } )
+        .then(res => {
+            if(res.data.session_exist){
+                debugger
+                this.setState({
+                    session_exist : res.data.session_exist
+                })
+            }
+        });
+    }
 	render(){
+        debugger
         
-        if(window.sessionStorage.logged_in === "true"){
-		return(
-            <div className="limiter">
-                <h3 style={{ marginTop:100}}><span className="login100-form-title p-b-51"> Your Projects </span></h3>
-            <UserProjects/>
-            <h3 style={{ marginTop:100}}><span className="login100-form-title p-b-51"> Projects You have bid on </span></h3>
-            <UserBids/>
-            </div>
-        )
-    } else{
-        return(window.location.href = "http://localhost:3000"
-        )
+        if(window.sessionStorage.getItem("logged_in")){
+            return(
+                <div className="limiter">
+                    <h3 style={{ marginTop:100}}><span className="login100-form-title p-b-51"> Your Projects </span></h3>
+                <UserProjects/>
+                <h3 style={{ marginTop:100}}><span className="login100-form-title p-b-51"> Projects You have bid on </span></h3>
+                <UserBids/>
+                </div>
+            )
+        }else{
+            return(window.location.href = "http://localhost:3000")
         }
     }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import './css/bootstrap.min.css';
 import './css/one-page-wonder.min.css';
+import axios from 'axios';
 
 class Header extends React.Component{
   constructor(props){
@@ -12,31 +13,45 @@ class Header extends React.Component{
       SignIn : './SignIn',
       SignUp  : './SignUp',
       Dashboard  : './Dashboard',
-      WorkSpot : './workspot'
+      WorkSpot : './workspot',
+      session_exist : null
 		}
     this.handleSignOut = this.handleSignOut.bind(this);
     this.handleProfile = this.handleProfile.bind(this);
   }
-
+  componentWillMount(){
+    debugger
+    axios.get('http://localhost:3001/checksession',{ withCredentials: true } )
+    .then(res => {
+      debugger
+        if(res.data.session_exist){
+            this.setState({
+                session_exist : res.data.session_exist
+            })
+        }
+    });
+  }
 handleProfile(e){
   window.sessionStorage.setItem("bidderprofile",false)
   window.sessionStorage.setItem("bidderprofilename",null)
   window.location.href = "http://localhost:3000/Profile";
 }
 
-handleSignOut(e){
-  window.sessionStorage.setItem("logged_in",false)
-  window.sessionStorage.setItem("username",null)
-  window.sessionStorage.setItem("password",null)  
-  this.setState({ logged_in : false })
-  if(window.sessionStorage.logged_in === "false"){
-    // this.props.history.push('/');
-    window.location.href = "http://localhost:3000/";
-  }
+handleSignOut(e){ 
+  axios.get('http://localhost:3001/signout',{ withCredentials: true } )
+    .then(res => {
+      debugger
+        if(!res.data.session_exist){
+            this.setState({
+                session_exist : res.data.session_exist
+            })
+            window.location.href = "http://localhost:3000/"
+        }
+    });
 }
 
 	render(){
-    if(window.sessionStorage.logged_in === "true"){
+    if(this.state.session_exist){
       return(
         <nav className="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
           <div className="container">

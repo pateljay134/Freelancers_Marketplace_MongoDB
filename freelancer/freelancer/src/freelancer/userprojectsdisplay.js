@@ -36,6 +36,8 @@ class UserProjectsDisplay extends React.Component{
         // });
     }
     componentWillMount() {
+
+        
         var project = {project_id : this.props.project_id}
         var self = this;
         axios.post('http://localhost:3001/projectbidcount', project)

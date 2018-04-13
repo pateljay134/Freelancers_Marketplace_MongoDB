@@ -7,7 +7,7 @@ import axios from 'axios';
 class ProfileDetails extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {bidderprofile:null,bidderprofilename:null, name: null, email: null, phone_number: null, skills: null , about_me : null, password : null};
+        this.state = {session_exist : null,bidderprofile:null,bidderprofilename:null, name: null, email: null, phone_number: null, skills: null , about_me : null, password : null};
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleName = this.handleName.bind(this);
         this.handlePhoneNumber = this.handlePhoneNumber.bind(this);
@@ -16,34 +16,20 @@ class ProfileDetails extends React.Component{
     }
     componentWillMount() {
             var profile = {email : window.sessionStorage.getItem("email")}
-            
+            console.log(profile)
+
             axios.post('http://localhost:3001/profilefetch', profile)
             .then(res => {
                 
-                // console.log(res.data.rows)
+                console.log(res.data.rows)
                 this.setState({
                     name : res.data.rows.name, 
-                    email: res.data.rows.email
+                    email: res.data.rows.email,
+                    phone_number: res.data.rows.phone_number,
+                    skills: res.data.rows.skills,
+                    about_me : res.data.rows.about_me
                 })
-                if(typeof res.data.rows.phone_number === "undefined")
-                this.setState({
-                    phone_number: null
-                })
-                if(typeof res.data.rows.skills === "undefined")
-                this.setState({
-                    skills: null
-                })
-                if(typeof res.data.rows.about_me === "undefined")
-                this.setState({
-                    about_me : null
-                })
-                else{
-                    this.setState({
-                        phone_number : res.data.rows.phone_number,
-                        skills : res.data.rows.skills,
-                        about_me : res.data.rows.about_me
-                    })
-                }
+                console.log(this.state)
                     
             });
         
@@ -86,14 +72,14 @@ class ProfileDetails extends React.Component{
     }
 
 	render(){
-        
+
         if(window.sessionStorage.getItem("bidderprofile")==="true"){
 
 		return(
 			<form method = "POST" className="login100-form validate-form flex-sb flex-w">
 					        {/* <span className="login100-form-title p-b-51"> Profile </span> */}
                             Name : <div className="wrap-input100 validate-input m-b-16" data-validate = "Name is required">
-						        <input className="input100" type="text" name="Name"  placeholder={this.state.name }  readOnly/>
+						        <input className="input100" type="text" name="Name"  placeholder={this.state.name !== null || "undefined"  ? this.state.name : "You do not have name?"}  readOnly/>
 						        <span className="focus-input100"></span>
 					        </div>
                             Phone Number : <div className="wrap-input100 validate-input m-b-16" data-validate = "Phone Number is required">

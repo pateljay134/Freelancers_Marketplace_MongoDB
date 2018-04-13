@@ -12,13 +12,24 @@ import './css/one-page-wonder.min.css';
 class AddProject extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {file: '', name: null, description: null, skills: null, range: null, filename:null };
+        this.state = {file: '', name: null, description: null, skills: null, range: null, filename:null,  session_exist : null};
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleName = this.handleName.bind(this);
         this.handleDescription = this.handleDescription.bind(this);
         this.handleSkills = this.handleSkills.bind(this);
         this.handleRange = this.handleRange.bind(this);
         this.handleFile = this.handleFile.bind(this);
+    }
+
+    componentWillMount(){
+        axios.get('http://localhost:3001/checksession',{ withCredentials: true } )
+        .then(res => {
+            if(res.data.session_exist){
+                this.setState({
+                    session_exist : res.data.session_exist
+                })
+            }
+        });
     }
       
     handleName(e){
@@ -87,7 +98,8 @@ class AddProject extends React.Component{
         })
     }
 	render(){
-        if(window.sessionStorage.logged_in === "true"){
+        debugger
+        if(window.sessionStorage.getItem("logged_in")){
 		return(
             <div className="limiter">
 		        <div className="container-login100">

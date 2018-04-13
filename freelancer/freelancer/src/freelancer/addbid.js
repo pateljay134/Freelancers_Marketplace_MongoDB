@@ -7,6 +7,7 @@ import './css/main.css';
 import './css/util.css';
 // import DisplayProjects from './displayprojects';
 import axios from 'axios';
+import SignIn from './signin'
 // import Homepage from './homepage';
 import ProjectData from './projectdata'
 // import 'https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900';
@@ -18,7 +19,7 @@ import './css/one-page-wonder.min.css';
 class AddBid extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {file: '', filename:null ,comment : null, days: null, usd: null, hired_bidder : null, status : null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
+        this.state = {session_exist : null, file: '', filename:null ,comment : null, days: null, usd: null, hired_bidder : null, status : null, project_id : null, project_name : null, description : null, skills : null, employer : null, budget_range : null, total_bids : null}
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleDays = this.handleDays.bind(this);
         this.handleUSD = this.handleUSD.bind(this);
@@ -66,7 +67,6 @@ class AddBid extends React.Component{
         window.location.href = "http://localhost:3000/adminaction"
     }
     componentDidMount() {
-        
         var project_details = { project_id : window.sessionStorage.getItem("project_id")}
         
         axios.post('http://localhost:3001/projectfetch', project_details)
@@ -132,7 +132,7 @@ class AddBid extends React.Component{
 
 	render(){
         debugger
-        if(window.sessionStorage.getItem("logged_in") === "true"){
+        if(window.sessionStorage.getItem("logged_in")){
 
             if(this.state.employer !== window.sessionStorage.getItem("email") && this.state.hired_bidder !== window.sessionStorage.getItem("email")){
                 return(
@@ -209,10 +209,8 @@ class AddBid extends React.Component{
                 )    
             }
         } else{
-
-            console.log("Hello")
             return(
-                <AddBid/>
+                <SignIn/>
             )
         }
     }

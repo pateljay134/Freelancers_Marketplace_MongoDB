@@ -17,10 +17,20 @@ import './css/one-page-wonder.min.css';
 class SignIn extends React.Component{
     constructor(props) {
         super(props);
-        this.state = { email: null, password: null };
+        this.state = { email: null, password: null, session_exist : null };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleEmail = this.handleEmail.bind(this);
         this.handlePassword = this.handlePassword.bind(this);
+    }
+    componentWillMount(){
+        axios.get('http://localhost:3001/checksession',{ withCredentials: true } )
+        .then(res => {
+            if(res.data.session_exist){
+                this.setState({
+                    session_exist : res.data.session_exist
+                })
+            }
+        });
     }
    
     handleEmail(e){
@@ -43,14 +53,11 @@ class SignIn extends React.Component{
             document.getElementById('email').innerHTML = "This email does not exist"
             }
             else{
-                axios.post('http://localhost:3001/signinprocess', val)
+                axios.post('http://localhost:3001/signinprocess', val, { withCredentials: true } )
                 .then(res => {
                     var logged_in = res.data.logged_in;
                     if(logged_in){
-                        window.sessionStorage.setItem("logged_in",logged_in)
                         window.sessionStorage.setItem("email", this.state.email);
-                        window.sessionStorage.setItem("name", res.data.result);
-                        
                         window.location.href = "http://localhost:3000/"
                     }else{
                         document.getElementById('email').innerHTML = "This email exists already"
@@ -62,7 +69,7 @@ class SignIn extends React.Component{
     }
 	render(){
         
-        if(window.sessionStorage.getItem("logged_in") || window.sessionStorage.logged_in===undefined){
+        if(!this.state.session_exist){
 		return(
         // <Provider store = {store}>
             <div className="limiter">

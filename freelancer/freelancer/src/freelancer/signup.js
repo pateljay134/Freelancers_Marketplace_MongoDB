@@ -13,7 +13,7 @@ import './css/one-page-wonder.min.css';
 class SignUp extends React.Component{
     constructor(props) {
         super(props);
-        this.state = { name: null, email: null, password: null };
+        this.state = { name: null, email: null, password: null, session_exist : null, logged_in : false };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleName = this.handleName.bind(this);
         this.handleEmail = this.handleEmail.bind(this);
@@ -74,16 +74,15 @@ class SignUp extends React.Component{
                 document.getElementById('email').innerHTML = "This email exists already"
                 }
                 else{
-                    axios.post('http://localhost:3001/signupprocess', val)
+                    axios.post('http://localhost:3001/signupprocess', val, {withCredentials : true})
                     .then(res => {
-                        var logged_in = res.data.logged_in;
-                        if(logged_in){
-                            window.sessionStorage.setItem("logged_in",logged_in)
-                            window.sessionStorage.setItem("email", this.state.email);
-                            window.sessionStorage.setItem("name", this.state.name);
-                            window.location.href = "http://localhost:3000/"
-                        }else{
-                            document.getElementById('email').innerHTML = "This email exists already"
+                        this.setState({
+                            logged_in : res.data.logged_in
+                        })
+                        if(this.state.logged_in){
+                            window.sessionStorage.setItem("logged_in", this.state.logged_in)
+                            window.sessionStorage.setItem("email", res.data.rows.email)
+                            window.location.href = "http://localhost:3000/Dashboard"
                         }
                     });
                 }
@@ -92,12 +91,21 @@ class SignUp extends React.Component{
             
     } 
     }
+    componentWillMount(){
+        axios.get('http://localhost:3001/checksession',{ withCredentials: true } )
+        .then(res => {
+            if(res.data.session_exist){
+                this.setState({
+                    session_exist : res.data.session_exist
+                })
+            }
+        });
+    }
 	render(){
-        if(window.sessionStorage.getItem("logged_in") || window.sessionStorage.logged_in===undefined){
+        debugger
+        if(!this.state.session_exist){
 		return(
-
             <div className="limiter">
-
 		        <div className="container-login100">
 			        <div className="wrap-login100 p-t-50 p-b-90">
 				        <form method = "POST" className="login100-form validate-form flex-sb flex-w">
@@ -116,16 +124,7 @@ class SignUp extends React.Component{
                                 <input className="input100" type="password" name="pass" onChange = {this.handlePassword.bind(this)} placeholder="Password" required="true"/>
                                 <span className="focus-input100"></span>
                             </div>
-                            {/* <PasswordStrengthMeter passwordText={"Enter Password"} onChange={this.onChange} />; */}
                             <p id="password" style={{color:'blue', marginBottom:5}}></p>
-                            {/* <div className="flex-sb-m w-full p-t-3 p-b-24">
-                                <div>
-                                    <a href="#" className="txt1">
-                                        Forgot?
-                                    </a>
-                                </div>
-					        </div> */}
-
                             <div className="container-login100-form-btn m-t-17">
                                 <input type="submit" className="login100-form-btn" value="SignUp" onClick = {this.handleSubmit}/>
                             </div>
