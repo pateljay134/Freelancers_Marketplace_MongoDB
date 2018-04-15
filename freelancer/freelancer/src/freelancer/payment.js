@@ -13,12 +13,13 @@ import './css/one-page-wonder.min.css';
 // import BidderProfileDetails from './bidderprofiledetails';
 // import BidderProfileImage from './bidderprofileimage';
 //import { debug } from 'util';
+import PieChart from 'react-simple-pie-chart';
 
 class Payment extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {session_exist:null, balance : null,card_number : null, expiry_date : null, cvv : null, name_on_card:null, amount:null, invalid:true, bank_account : null, routing_number : null}
+        this.state = {debit_amount:0, credit_amount : 0, session_exist:null, balance : null,card_number : null, expiry_date : null, cvv : null, name_on_card:null, amount:null, invalid:true, bank_account : null, routing_number : null}
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleNumberChange = this.handleNumberChange.bind(this)
         this.handleExpiryDate = this.handleExpiryDate.bind(this)
@@ -31,7 +32,6 @@ class Payment extends React.Component{
         this.handleDebitAmount = this.handleDebitAmount.bind(this)
     }
     componentWillMount(){
-
         var profile = {email : window.sessionStorage.getItem("email")}
         axios.post('http://localhost:3001/profilefetch',profile)
         .then(res => {
@@ -39,6 +39,19 @@ class Payment extends React.Component{
                 balance : res.data.rows.balance
             })
         });
+        
+        axios.post('http://localhost:3001/transactionhistory', profile)
+        .then(res => {
+            debugger
+            res.data.rows.transaction_details.map( data => {
+                    if(data.amount>0) {
+                    this.state.credit_amount = this.state.credit_amount + Number(data.amount)
+                    }
+                    else{
+                        this.state.debit_amount = this.state.debit_amount + Number(data.amount*-1)
+                    }
+                })
+            })
     }
     handleNumberChange(e){
         debugger
@@ -181,6 +194,10 @@ class Payment extends React.Component{
         }
     }
 
+    viewHistory(e){
+        e.preventDefault();
+        window.location.href = "http://localhost:3000/transactionhistory"
+    }
 
 	render(){
 
@@ -300,6 +317,25 @@ class Payment extends React.Component{
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
+                    <button className="btn btn-submit" style={{ marginTop:50, marginLeft:30}} onClick={this.viewHistory}>
+                                View Transaction History
+                    </button>                
+            </div>
+            <div style={{width:300, marginLeft : 578, marginTop : 30}}>
+            <PieChart
+                slices={[
+                    {
+                    color: '#0f0',
+                    value: this.state.credit_amount,
+                    },
+                    {
+                    color: '#f00',
+                    value: this.state.debit_amount,
+                    },
+                ]}
+            />
             </div>
         </div>
         )      

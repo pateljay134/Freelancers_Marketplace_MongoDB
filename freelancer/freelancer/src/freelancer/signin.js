@@ -57,6 +57,7 @@ class SignIn extends React.Component{
                 .then(res => {
                     var logged_in = res.data.logged_in;
                     if(logged_in){
+                        window.sessionStorage.setItem("logged_in", logged_in);
                         window.sessionStorage.setItem("email", this.state.email);
                         window.location.href = "http://localhost:3000/"
                     }else{

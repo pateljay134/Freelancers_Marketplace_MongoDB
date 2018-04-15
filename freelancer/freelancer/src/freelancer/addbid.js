@@ -29,6 +29,7 @@ class AddBid extends React.Component{
     }
 
     handleSubmit(e){
+        debugger
         e.preventDefault();
         var project_data = {
             project_id : this.state.project_id , 
@@ -66,7 +67,8 @@ class AddBid extends React.Component{
         e.preventDefault();
         window.location.href = "http://localhost:3000/adminaction"
     }
-    componentDidMount() {
+    componentWillMount() {
+        debugger
         var project_details = { project_id : window.sessionStorage.getItem("project_id")}
         
         axios.post('http://localhost:3001/projectfetch', project_details)
@@ -153,7 +155,7 @@ class AddBid extends React.Component{
                                     </div>
 
                                     <div className="container-login100-form-btn m-t-17">
-                                        <input type="submit" className="login100-form-btn" value="Submit Bid" onClick = {this.handleProgress}/>
+                                        <input type="submit" className="login100-form-btn" value="Submit Bid" onClick = {this.handleSubmit}/>
                                     </div>
 
                                 </form>

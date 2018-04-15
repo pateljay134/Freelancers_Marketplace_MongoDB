@@ -11,6 +11,7 @@ import WorkSpot from './workspot';
 import AdminAction from './adminaction';
 import Payment from './payment';
 import MakePayment from './makepayment';
+import TransactionHistory from './transactionhistory';
 
 class BodyData extends React.Component{
 
@@ -35,6 +36,7 @@ class BodyData extends React.Component{
 					<Route path="/adminaction" component={AdminAction} /> 
 					<Route path="/payment" component={Payment} /> 
 					<Route path="/MakePayment" component={MakePayment} /> 
+					<Route exact path="/TransactionHistory" component={TransactionHistory} />
 					</Switch>
 				</div>
 			</Router>

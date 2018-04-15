@@ -283,93 +283,96 @@ app.get('/signout', function(req, res){
 
 
 app.post('/addproject', function(req, res) {
-    var project  = new projects;
-    let form = new multiparty.Form();
-    form.parse(req, (err, fields, files) => {
-    let { path: tempPath, originalFilename } = files.file[0];
-    var fileType = originalFilename.split(".");
-    var fileName = Date.now() + '.' + fileType[fileType.length - 1]
 
+  var project  = new projects;
+  let form = new multiparty.Form();
+  form.parse(req, (err, fields, files) => {
+  let { path: tempPath, originalFilename } = files.file[0];
+  var fileType = originalFilename.split(".");
+  var fileName = Date.now() + '.' + fileType[fileType.length - 1]
 
-      mongoose.connect(url, function(err, db) {
-      if (err) throw err;
-      else{
-        var myobj = { project_id : project.id, days:0, title: fields.name[0] , description : fields.description[0], skills_required: fields.skills[0], employer:fields.email[0], budget_range:fields.range[0], file:fileName, status : "PENDING" };
-
-        db.collection("projects").insertOne(myobj, function(err, result) {
-          if(err){
-            res.json({project_added:false});
-          }
-          else{
-            let copyToPath = "./src/files/" + fileName;
-            fs.readFile(tempPath, (err, data) => {
+  var myobj = { project_id : project.id, days:0, title: fields.name[0] , description : fields.description[0], skills_required: fields.skills[0], employer:fields.email[0], budget_range:fields.range[0], file:fileName, status : "PENDING" };
+  
+  kafka.make_request('addproject', myobj, function(err, rows){
+    if (err) throw err;
+    else{ 
+        if(rows.project_added){
+        let copyToPath = "./src/files/" + fileName;
+        fs.readFile(tempPath, (err, data) => {
+            if (err) throw err;
+            fs.writeFile(copyToPath, data, (err) => {
               if (err) throw err;
-              fs.writeFile(copyToPath, data, (err) => {
-                if (err) throw err;
                 fs.unlink(tempPath, () => {
                 });
                 res.json({project_added : true});
-              });
             });
-          }
         });
       }
-      });
-    })
+    }
+  });
+  
+  
+  
+    //   mongoose.connect(url, function(err, db) {
+    //   if (err) throw err;
+    //   else{
+    //     var myobj = { project_id : project.id, days:0, title: fields.name[0] , description : fields.description[0], skills_required: fields.skills[0], employer:fields.email[0], budget_range:fields.range[0], file:fileName, status : "PENDING" };
+
+    //     db.collection("projects").insertOne(myobj, function(err, result) {
+    //       if(err){
+    //         res.json({project_added:false});
+    //       }
+    //       else{
+    //         let copyToPath = "./src/files/" + fileName;
+    //         fs.readFile(tempPath, (err, data) => {
+    //           if (err) throw err;
+    //           fs.writeFile(copyToPath, data, (err) => {
+    //             if (err) throw err;
+    //             fs.unlink(tempPath, () => {
+    //             });
+    //             res.json({project_added : true});
+    //           });
+    //         });
+    //       }
+    //     });
+    //   }
+    //   });
+    // })
+})
 });
+///////////////////////////////////////////////
 
 app.post('/profilefetch', function(req, res) {
-  console.log("Hello")
-  mongoose.connect(url, function(err, db) {
-    if (err) throw err;
+  kafka.make_request('profilefetch', req.body, function(err, rows){
+    if (err){ throw err; res.json({logged_in:false})}
     else{
-      db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
-        if(!err){
-          console.log(rows[0])
-          res.json({rows : rows[0]})
-        }
-        else{
-          res.json({logged_in:false})
-        }
-      })
+      res.json({rows : rows})
     }
   });
-
 });
+////////////////////////////////////////////////
 
-app.post('/bidderfetch', function(req, res) {
-  connection.query("SELECT * from users where username = ?",req.body.username,function(err, rows) {
-    if(rows.length>=1){
-      res.json({rows : rows[0]})
-    }
-    else{
-      res.json({logged_in:false})
-    }
-  });
+// app.post('/bidderfetch', function(req, res) {
+//   connection.query("SELECT * from users where username = ?",req.body.username,function(err, rows) {
+//     if(rows.length>=1){
+//       res.json({rows : rows[0]})
+//     }
+//     else{
+//       res.json({logged_in:false})
+//     }
+//   });
 
-});
+// });
 
 app.post('/profileupdate', function(req, res) {
-  // var sql = "update users SET name = '"+req.body.name+"', phone_number = '"+req.body.phone_number+ "', skills = '"+req.body.skills + "', about_me = '"+req.body.about_me +"' WHERE username = '"+ req.body.username+"'";  
-  // connection.query(sql,  function(err, result) {
-  //   res.json({data_inserted:true});
-  // });
-  mongoose.connect(url, function(err, db) {
-    if (err) throw err;
+  kafka.make_request('profileupdate', req.body, function(err, rows){
+    if (err){ throw err; res.json({data_inserted:false}) }
     else{
-      db.collection("users").update({email : req.body.email}, { $set: {name : req.body.name , phone_number : req.body.phone_number , skills : req.body.skills , about_me : req.body.about_me}}, function(err, rows){
-        if(!err){
-          res.json({data_inserted:true});
-        }
-        else{
-          res.json({data_inserted:false})
-        }
-      })
+      res.json({data_inserted:true});
     }
   });
-
 });
-
+/////////////////////////////////////////////////
 
 app.post('/imageupdate', function(req, res) {
 
@@ -411,131 +414,61 @@ app.post('/imageupdate', function(req, res) {
 
 
 
-
 app.post('/userprojects', function(req, res) {
-
-  mongoose.connect(url, function(err, db) {
-    if (err) throw err;
-
+  kafka.make_request('userprojects', req.body, function(err, rows){
+    if (err){ throw err; res.json({logged_in:false})}
     else{
-      db.collection("projects").find({employer : req.body.email}).toArray(function(err, rows){
-        if(!err){
-          res.json({rows : rows, status: 200})
-        }
-        else{
-          res.json({logged_in:false})
-        }
-      })
+      res.json({rows : rows})
     }
   });
-
 });
+/////////////////////////////////////////////////
+
 app.post('/projectbidcount', function(req, res) {
-  mongoose.connect(url, function(err, db) {
-    if (err) throw err;
-    else{
-      db.collection("project_bids").find({project_id: req.body.project_id}).toArray(function(err, result){
-          if(!err && typeof result[0] !== "undefined"){
-              res.json({project_id : result[0].project_id, total_bids:result.length})
-          }else{
-              res.json({result:null})
-          }
-      });
+  kafka.make_request('projectbidcount', req.body, function(err, rows){
+    if(!err ){
+        res.json({project_id : rows.project_id, total_bids:rows.total_bids})
+    }else{
+        res.json({result:null})
     }
   });
-
 });
+///////////////////////////////////////////////////
 
 app.post('/hirebidder', function(req, res) {
-  var email = req.body.bidder_email
-  var project_id = req.body.project_id
-  var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-           user: 'nodemailerfreelancer@gmail.com',
-           pass: 'Thejoker@13'
-       }
-   });
-   const mailOptions = {
-    from: 'nodemailerfreelancer@gmail.com',
-    to: req.body.bidder_email,
-    subject: 'You are hired for the project',
-    html: '<p>Go, Start Earning Money<p>'
-  };
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error)
-            console.log(error);
-    });
-
-  mongoose.connect(url, function(err, db) {
+  kafka.make_request('hirebidder', req.body, function(err, rows){
     if (err) throw err;
-    else{
-      db.collection("projects").update({project_id : req.body.project_id, status : "PENDING" }, { $set: {status: 'ON GOING', hiredbidder : req.body.bidder_email , hiredbiddername : req.body.bidder_name}}, function(err, rows){
-        if(!err){
-          db.collection("users").update(
-            { email : email },
-            { $push: { assigned_project_id : project_id} }
-          )
-          res.json({bidder_hired:true})
-        }else{
-          res.json({bidder_hired:false})
-        }
-      })
-    }
+    else{ res.json({bidder_hired:true}) }
   });
-
-
 });
+//////////////////////////////////////////////////
 
 app.post('/biddersfetch', function(req, res) {
-
-  mongoose.connect(url, function(err, db) {
+  kafka.make_request('biddersfetch', req.body, function(err, rows){
     if (err) throw err;
-
-    else{
-      db.collection("project_bids").find({project_id : req.body.project_id}).toArray(function(err, rows){
-        if(!err){
-          res.json({rows : rows, status: 200})
-        }
-        else{
-          res.json({logged_in:false})
-        }
-      })
-    }
+    else{ res.json({rows : rows.rows, status: 200}) }
   });
-
 });
+//////////////////////////////////////////////////
 
 app.post('/userbids', function(req, res) {
-  mongoose.connect(url, function(err, db) {
-    if (err) throw err;
-
+  kafka.make_request('userbids', req.body, function(err, rows){
+    if (err){ throw err; res.json({logged_in:false})}
     else{
-      db.collection("project_bids").find({bidder_email : req.body.email}).toArray(function(err, rows){
-        if(!err){
-          res.json({rows : rows, status: 200})
-        }
-        else{
-          res.json({logged_in:false})
-        }
-      })
+      res.json({rows : rows})
     }
   });
 });
-
+////////////////////////////////////////////////
 
 app.post('/projectsfetch', function(req, res) {
-  console.log("I am check")
-  var data = req.body;
-  kafka.make_request('projectsfetch', data, function(err, rows){
+  kafka.make_request('projectsfetch', req.body, function(err, rows){
     if (err) throw err;
     console.log(rows)
     console.log("I am in session")
-    rows.length >= 1 ? res.json({data_present: true, rows: rows}) :  res.json({data_present: false});
+    res.json({rows:rows})
+    // rows.length >= 1 ? res.json({data_present: true, rows: rows}) :  res.json({data_present: false});
   }); 
-
-
-
 
   // mongoose.connect(url, function(err, db) {
   //   if (err) res.json({logged_in:false})
@@ -566,9 +499,6 @@ app.post('/projectsfetch', function(req, res) {
   //                       // }
   //                 // });
 
-
-
-
   //         res.json({rows : rows})
   //       }
   //       else{
@@ -580,190 +510,63 @@ app.post('/projectsfetch', function(req, res) {
   // });
     
 });
+//////////////////////////////////////////////
 
 app.post('/projectfetch', function(req, res) {
-  mongoose.connect(url, function(err, db) {
-    if (err) res.json({logged_in:false})
-    else{
-          db.collection("projects").find({project_id : req.body.project_id}).toArray(function(err, rows){
-            if(!err){
-              db.collection("project_bids").aggregate(
-                [ { $match: {"project_id": req.body.project_id }},
-                  {
-                    $group:
-                      {
-                        _id: "$project_id",
-                        avg: { $avg: "$days" }
-                      }
-                  }
-                ]).toArray(function(err, result){
-                  if(!err && typeof result[0] !== "undefined"){
-                      res.json({rows:rows[0], result:result[0].avg.toFixed(2)})
-                  }else{
-                      res.json({rows:rows[0], result:null})
-                  }
-              });
-            }
-            else{
-              res.json({logged_in:false})
-            }
-      });
-  }
+  kafka.make_request('projectfetch', req.body, function(err, rows){
+    if (err) throw err;
+    rows.result !== null ? res.json( { rows:rows.rows[0], result: rows.result[0].avg.toFixed(2) } ) : res.json({rows:rows.rows[0]})
   });
-});
+})
+// ////////////////////////////////////////////
 
 app.post('/searchprojects', function(req, res) {
-  mongoose.connect(url, function(err, db) {
-    if (err) res.json({logged_in:false})
-    else{
-      db.collection("projects").aggregate(
-        [ 
-          { $match: 
-                { $or: 
-                  [ { "title" : { $regex:  req.body.search_data, $options: "i"} }, 
-                    { "skills_required": { $regex:  req.body.search_data, $options: "i"} },
-                    { "employer": { $regex:  req.body.search_data, $options: "i"} },
-                    { "status": { $regex:  req.body.search_data, $options: "i"} }
-                  ] 
-                }
-          }
-        ]).toArray(function(err, rows){
-        if(!err && rows.length!==0){
-          res.json({rows : rows})
-        }
-        else{
-          res.json({rows : null})
-        }
-      })
-      
-    }
+  kafka.make_request('searchprojects', req.body, function(err, rows){
+    if (err) throw err;
+    res.json({rows : rows.rows})
   });
-
 });
+////////////////////////////////////////////////////
+
 app.post('/searchuserprojects', function(req, res) {
-  mongoose.connect(url, function(err, db) {
-    if (err) res.json({logged_in:false})
-    else{
-      db.collection("projects").aggregate(
-        [ 
-          { $match: {$and : [ { $or: 
-            [ { "title" : { $regex:  req.body.search_data, $options: "i"} }, 
-              { "skills_required": { $regex:  req.body.search_data, $options: "i"} },
-              { "status": { $regex:  req.body.search_data, $options: "i"} }
-            ] 
-          }, {"employer": { $regex:  req.body.email, $options: "i"} } 
-        ]}   
-          }
-        ]).toArray(function(err, rows){
-        if(!err && rows.length!==0){
-          res.json({rows : rows})
-        }
-        else{
-          res.json({rows : null})
-        }
-      })
-      
-    }
+  kafka.make_request('searchuserprojects', req.body, function(err, rows){
+    if (err) throw err;
+    res.json({rows : rows.rows})
   });
-
 });
+//////////////////////////////////////////////////////
+
 app.post('/searchbiddedproject', function(req, res) {
-  mongoose.connect(url, function(err, db) {
-    if (err) res.json({logged_in:false})
-    else{
-      db.collection("project_bids").aggregate(
-        [ 
-          { $match: {$and : [ { $or: 
-            [ { "project_data.title" : { $regex:  req.body.search_data, $options: "i"} }, 
-              { "project_data.skills_required": { $regex:  req.body.search_data, $options: "i"} },
-              { "project_data.status": { $regex:  req.body.search_data, $options: "i"} },
-              { "project_data.employer": { $regex:  req.body.search_data, $options: "i"} }
-            ] 
-          }, {"bidder_email": { $regex:  req.body.email, $options: "i"} } 
-        ]}   
-          }
-        ]).toArray(function(err, rows){
-        if(!err && rows.length!==0){
-          res.json({rows : rows})
-        }
-        else{
-          res.json({rows : null})
-        }
-      })
-      
-    }
+  kafka.make_request('searchbiddedproject', req.body, function(err, rows){
+    if (err) throw err;
+    res.json({rows : rows.rows})
   });
-
 });
+////////////////////////////////////////////////////////
 
 app.post('/filterstatus', function(req, res) {
-  mongoose.connect(url, function(err, db) {
-    if (err) res.json({logged_in:false})
-    else{
-      db.collection("projects").aggregate(
-        [ 
-          { $match: 
-            { $and : [
-              { "status" : { $regex:  req.body.search_data} } ,
-              { "employer": { $regex:  req.body.employer} }
-            ]}
-          }
-        ]).toArray(function(err, rows){
-        if(!err && rows.length!==0){
-          res.json({rows : rows})
-        }
-        else{
-          res.json({rows : null})
-        }
-      })
-      
-    }
+  kafka.make_request('filterstatus', req.body, function(err, rows){
+    if (err) throw err;
+    res.json({rows : rows.rows})
   });
+});
+/////////////////////////////////////////////////////
 
-});
 app.post('/biddingfilterstatus', function(req, res) {
-  mongoose.connect(url, function(err, db) {
-    if (err) res.json({logged_in:false})
-    else{
-      db.collection("project_bids").aggregate(
-        [ 
-          { $match: 
-            { $and : [
-              { "project_data.status" : { $regex:  req.body.search_data} } ,
-              { "bidder_email": { $regex:  req.body.employer} }
-            ]}
-          }
-        ]).toArray(function(err, rows){
-        if(!err && rows.length!==0){
-          res.json({rows : rows})
-        }
-        else{
-          res.json({rows : null})
-        }
-      })
-      
-    }
+  kafka.make_request('biddingfilterstatus', req.body, function(err, rows){
+    if (err) throw err;
+    res.json({rows : rows.rows})
   });
 });
+//////////////////////////////////////////////////////
 
 app.post('/addbid', function(req, res) {
-  var project_bid  = new project_bids;
-  mongoose.connect(url, function(err, db) {
-    if (err) res.json({logged_in:false})
-    else{
-      var myobj = {project_data : req.body.project_data, bid_id : project_bid.id, project_id: req.body.project_id, days : Number(req.body.days), usd: req.body.usd, bidder_name : req.body.bidder_name, bidder_email: req.body.bidder_email};
-      db.collection("project_bids").insertOne(myobj, function(err, result) {
-        if(!err){
-          res.json({bid_added: true})
-        }
-        else{
-          res.json({bid_added:false})
-        }
-      })
-    }
+  kafka.make_request('addbid', req.body, function(err, rows){
+    if (err) throw err;
+    else{ res.json({bid_added:true}) }
   });
-
 });
+///////////////////////////////////////////////////
 
 app.post('/projectprogress', function(req, res) {
   var project  = new projects;
@@ -803,105 +606,36 @@ app.post('/projectprogress', function(req, res) {
 
 
 app.post('/balanceupdate', function(req, res) {
-  mongoose.connect(url, function(err, db) {
+  kafka.make_request('balanceupdate', req.body, function(err, rows){
     if (err) throw err;
-    else{
-      db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
-        if(!err){
-          var transaction = {name_on_card : req.body.name_on_card , card_number : req.body.card_number , expiry_date : req.body.expiry_date , amount : req.body.amount}
-          db.collection("users").update({email : req.body.email}, { $set: {balance : rows[0].balance === null ? Number(req.body.amount) : Number(rows[0].balance) + Number(req.body.amount), transaction } }, function(err, rows){
-            if(!err){
-              db.collection("tranaction").update(
-                { email : req.body.email },
-                { $push: { transaction_details : transaction } }
-              )
-              res.json({data_inserted:true});
-            }
-            else{
-              res.json({data_inserted:false})
-            }
-          })
-
-        }
-        else{
-          res.json({data_inserted:false})
-        }
-      })
-    }
+    else{ res.json({data_inserted:true}) }
   });
-
 });
+///////////////////////////////////////////////////
 
 app.post('/withdrawbalance', function(req, res) {
-  mongoose.connect(url, function(err, db) {
+  kafka.make_request('withdrawbalance', req.body, function(err, rows){
     if (err) throw err;
-    else{
-      db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
-        var transaction = {bank_account : req.body.bank_account , routing_number : req.body.routing_number, amount : req.body.amount}
-        db.collection("users").update({email : req.body.email}, { $set: {balance : rows[0].balance === (0 || null)? Number(req.body.amount) : Number(rows[0].balance) + Number(req.body.amount), transaction } }, function(err, rows){
-          if(!err){
-            db.collection("tranaction").update(
-              { email : req.body.email },
-              { $push: { transaction_details : transaction } }
-            )
-            res.json({data_inserted:true});
-          }
-          else{
-            res.json({data_inserted:false})
-          }
-        })
-      })
-          
-      }})
+    else{ res.json({data_inserted:true}) }
+  });
 });
+////////////////////////////////////////////////////
 
 app.post('/transfermoney', function(req, res) {
-  mongoose.connect(url, function(err, db) {
+  kafka.make_request('transfermoney', req.body, function(err, rows){
     if (err) throw err;
-    else{
-      db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
-        var transaction = {bank_account : req.body.bank_account , routing_number : req.body.routing_number, amount : "-"+req.body.amount}
-        db.collection("users").update({email : req.body.email}, { $set: {balance : rows[0].balance === 0? Number("-"+req.body.amount) : Number(rows[0].balance) + Number("-"+req.body.amount), transaction } }, function(err, rows){
-          if(!err){
-            db.collection("tranaction").update(
-              { email : req.body.email },
-              { $push: { transaction_details : transaction } }
-            )
-            db.collection("users").find({email : req.body.bidder_email}).toArray(function(err, rows){
-              var transaction = {bank_account : req.body.bank_account , routing_number : req.body.routing_number, amount : req.body.amount}
-              db.collection("users").update({email : req.body.bidder_email}, { $set: {balance : rows[0].balance === (0 || null)? Number(req.body.amount) : Number(rows[0].balance) + Number(req.body.amount), transaction } }, function(err, rows){
-                if(!err){
-                  db.collection("tranaction").update(
-                    { email : req.body.bidder_email },
-                    { $push: { transaction_details : transaction } }
-                  )
-                  db.collection("projects").update(
-                    { project_id : req.body.project_id },
-                    { $set: {status: 'CLOSED'}}
-                  )
-
-                  db.collection("project_bids").update(
-                    { project_id : req.body.project_id },
-                    { $set: { "project_data.status" : "CLOSED"} }
-                  )
-                  res.json({data_inserted:true});
-                }
-                else{
-                  res.json({data_inserted:false})
-                }
-              })
-            })
-          }
-          else{
-            res.json({data_inserted:false})
-          }
-        })
-      })
-
-          
-      }})
+    else{ res.json({data_inserted:true}) }
+  });
 });
+///////////////////////////////////////////////////
 
+app.post('/transactionhistory', function(req, res) {
+  kafka.make_request('transactionhistory', req.body, function(err, rows){
+    if (err) throw err;
+    else{ res.json({rows: rows.rows[0]}) }
+  });
+});
+/////////////////////////////////////////////////////
 
 var port = process.env.API_PORT || 3001;
 

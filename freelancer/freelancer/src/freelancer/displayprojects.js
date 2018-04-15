@@ -58,6 +58,8 @@ class DisplayProjects extends React.Component{
         
         e.preventDefault();
         console.log(e.target.value)
+
+        debugger
             window.sessionStorage.setItem("project_id",this.props.project_id );
             window.location.href = "http://localhost:3000/addbid"
     }

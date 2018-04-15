@@ -20,10 +20,8 @@ class Header extends React.Component{
     this.handleProfile = this.handleProfile.bind(this);
   }
   componentWillMount(){
-    debugger
     axios.get('http://localhost:3001/checksession',{ withCredentials: true } )
     .then(res => {
-      debugger
         if(res.data.session_exist){
             this.setState({
                 session_exist : res.data.session_exist
@@ -40,7 +38,6 @@ handleProfile(e){
 handleSignOut(e){ 
   axios.get('http://localhost:3001/signout',{ withCredentials: true } )
     .then(res => {
-      debugger
         if(!res.data.session_exist){
             this.setState({
                 session_exist : res.data.session_exist
