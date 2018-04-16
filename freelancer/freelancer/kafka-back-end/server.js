@@ -23,6 +23,17 @@ mongoose.connect("mongodb://root:2131@ds231749.mlab.com:31749/freelancer");
 var url = "mongodb://root:2131@ds231749.mlab.com:31749/freelancer"
 
 
+var db;
+mongoose.connect(url, function(err, database) {
+  if(err) throw err;
+  console.log(database)
+  db = database;
+  // users_profile = db.collection("users");
+  // console.log(db);
+});
+
+
+
 var projectsfetch = connection.getConsumer('projectsfetch');
 var projectfetch = connection.getConsumer('projectfetch');
 var addproject = connection.getConsumer('addproject');
@@ -75,7 +86,7 @@ projectsfetch.on('message', function(message){
     mongoose.connect(url, function(err, db) {
     if (err) res.json({logged_in:false})
     else{
-      db.collection("projects").find().sort({ budget_range: values.sort }).toArray(function(err, rows){
+      db.collection("projects").find().sort({ budget_range: -1 }).toArray(function(err, rows){
         if(!err){
             var payloads = [
               { topic: data.replyTo,
@@ -177,10 +188,11 @@ profilefetch.on('message', function(message){
     var data = JSON.parse(message.value);
     var values = data.data;
     mongoose.connect(url, function(err, db) {
-        if (err) throw err;
-        else{
+      if (err) res.json({logged_in:false})
+      else{
           db.collection("users").find({email : values.email}).toArray(function(err, rows){
             if(!err){
+              console.log("Sending User's data")
               var payloads = [
                 { topic: data.replyTo,
                     messages:JSON.stringify({
@@ -194,8 +206,7 @@ profilefetch.on('message', function(message){
               });
             }
           })
-        }
-      });
+        }})
   });
 
 userprojects.on('message', function(message){

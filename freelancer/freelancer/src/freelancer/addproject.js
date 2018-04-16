@@ -78,7 +78,7 @@ class AddProject extends React.Component{
         }
 
         var project_added;
-        var val = {name: this.state.name, description: this.state.description, skills: this.state.skills, range: this.state.range,username:window.sessionStorage.getItem("username")}
+        var val = {name: this.state.name, description: this.state.description, skills: this.state.skills, range: Number(this.state.range),username:window.sessionStorage.getItem("username")}
         console.log(val)
         formData.append('name', this.state.name);
         formData.append('description', this.state.description);

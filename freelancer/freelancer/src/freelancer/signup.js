@@ -41,8 +41,8 @@ class SignUp extends React.Component{
     handleSubmit(e){
         e.preventDefault();
         
-        // var password = new RegExp("^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
-        // var email = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        var password = new RegExp("^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
+        var email = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         var error = false
         if(this.state.name===null){
             error=true
@@ -51,19 +51,19 @@ class SignUp extends React.Component{
         }else{ document.getElementById('name').innerHTML = "" 
         error = false}
 
-        // if(!email.test(this.state.email) || (this.state.email===null)){
-        //     error=true
-        //     document.getElementById('email').innerHTML = "Not valid email address"
+        if(!email.test(this.state.email) || (this.state.email===null)){
+            error=true
+            document.getElementById('email').innerHTML = "Not valid email address"
             
-        // }else{ document.getElementById('email').innerHTML = "" 
-        // error = false}
+        }else{ document.getElementById('email').innerHTML = "" 
+        error = false}
 
-        // if(!password.test(this.state.password)){
-        //     error=true
-        //     document.getElementById('password').innerHTML = "Make your password strong"
+        if(!password.test(this.state.password)){
+            error=true
+            document.getElementById('password').innerHTML = "Make your password strong"
                     
-        // }else{ document.getElementById('password').innerHTML = "" 
-        // error = false}
+        }else{ document.getElementById('password').innerHTML = "" 
+        error = false}
 
         if(!error){
 

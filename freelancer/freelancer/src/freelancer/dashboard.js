@@ -17,6 +17,7 @@ class DashBoard extends React.Component{
         this.handleChange = this.handleChange.bind(this)
         this.handlePageChange = this.handlePageChange.bind(this)
         this.handleSort = this.handleSort.bind(this)
+        this.handleMatching = this.handleMatching.bind(this)
     }
 
     componentWillMount() {
@@ -86,6 +87,18 @@ class DashBoard extends React.Component{
             current_page : e.target.dataset.id
         })
     }
+    handleMatching(e){
+        e.preventDefault();
+        var search_data = {email : window.sessionStorage.getItem("email")}
+        axios.post('http://localhost:3001/searchmatching', search_data)
+        .then(res => {
+            this.setState({
+                projects : res.data.rows
+            })
+        });
+    }
+
+
 	render(){
         if(this.state.projects === null){
             <DisplayProjects/>
@@ -125,14 +138,10 @@ class DashBoard extends React.Component{
             
             return(
                 <div className="table">
-                {/* <div>
-                <button className="login100-form-btn-bid" style={{width:"50%", alignItems:"center"}}>All Projects</button>
-                <button className="login100-form-btn-bid" style={{width:"50%"}}>Match The Skills</button>
-                </div> */}
-                    
+
                 <input style={{width : "85%", height:55, fontSize:25, borderColor : "black"}} class= "wrap-input100 m-b-5" type = "text" onChange= {this.handleChange} placeholder = "Search 🔍"/>
                 {/* <div class="dropdown" style={{float:"right", paddingBottom:5, paddingRight:4}}> */}
-                <button style={{width:170, marginBottom:5, float:"right", marginRight:9}} class="dropbtn">Match Your Skills</button>
+                <button style={{width:170, marginBottom:5, float:"right", marginRight:9}} onClick = {this.handleMatching} class="dropbtn">Match Your Skills</button>
                 {/* <div class="dropdown-content">
                     <a href="#">PENDING</a>
                     <a href="#">ON GOING</a>

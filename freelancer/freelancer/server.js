@@ -32,6 +32,22 @@ var transactions = require('./src/freelancer/models/transaction');
 mongoose.connect("mongodb://root:2131@ds231749.mlab.com:31749/freelancer");
 var url = "mongodb://root:2131@ds231749.mlab.com:31749/freelancer"
 
+var db;
+mongoose.connect(url, function(err, database) {
+  if(err) throw err;
+  console.log(database)
+  db = database;
+  users_profile = db.collection("users");
+  console.log(db);
+});
+
+
+
+
+
+
+
+
 app.use(function(req, res, next) {
  res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
  res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -55,12 +71,17 @@ app.use(session({
 }));
 
 
+
+
+
 passport.serializeUser(function(user, done) {
   console.log("I am in serialiser")
   console.log(user);
   console.log(user.id);
   done(null, user);
 });
+
+
 
 passport.deserializeUser(function(user, done) {
   // console.log("Deserialize")
@@ -75,6 +96,9 @@ passport.deserializeUser(function(user, done) {
     return done(null, user);
   })
 });
+
+
+
 
 passport.use('local-signup', new LocalStrategy({
   usernameField : 'email',
@@ -343,6 +367,7 @@ app.post('/addproject', function(req, res) {
 ///////////////////////////////////////////////
 
 app.post('/profilefetch', function(req, res) {
+  console.log("Getting User Information")
   kafka.make_request('profilefetch', req.body, function(err, rows){
     if (err){ throw err; res.json({logged_in:false})}
     else{
@@ -464,7 +489,6 @@ app.post('/userbids', function(req, res) {
 app.post('/projectsfetch', function(req, res) {
   kafka.make_request('projectsfetch', req.body, function(err, rows){
     if (err) throw err;
-    console.log(rows)
     console.log("I am in session")
     res.json({rows:rows})
     // rows.length >= 1 ? res.json({data_present: true, rows: rows}) :  res.json({data_present: false});
@@ -580,10 +604,10 @@ app.post('/projectprogress', function(req, res) {
     mongoose.connect(url, function(err, db) {
     if (err) throw err;
     else{
-      console.log("Hello")
-      console.log(fields.project_id[0])
-      console.log(fields.comment[0])
-      console.log(fields.hired_bidder[0])
+      // console.log("Hello")
+      // console.log(fields.project_id[0])
+      // console.log(fields.comment[0])
+      // console.log(fields.hired_bidder[0])
       var myobj = { project_id : fields.project_id[0], comment : fields.comment[0], bidder_email : fields.hired_bidder[0], filename : fileName};
       db.collection("projects").update(
         { project_id : fields.project_id[0] },
@@ -636,6 +660,31 @@ app.post('/transactionhistory', function(req, res) {
   });
 });
 /////////////////////////////////////////////////////
+
+app.post('/searchmatching', function(req, res) {
+  
+  mongoose.connect(url, function(err, db) {
+    if (err) res.json({logged_in:false})
+    else{
+      db.collection("users").find({email : req.body.email}).toArray(function(err, rows){
+        console.log("Hello")
+        console.log(rows[0].skills)
+      db.collection("projects").find({skills_required : rows[0].skills}).toArray(function(err, result){
+        if(!err){
+          res.json({rows : result})
+        }
+        else{
+          res.json({logged_in:false})
+        }
+      })
+    })
+      
+    }
+  });
+});
+
+
+
 
 var port = process.env.API_PORT || 3001;
 
