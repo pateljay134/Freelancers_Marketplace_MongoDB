@@ -6,3 +6,6 @@
 6. Start Kafka with command $ bin/kafka-server-start.sh config/server.properties
 7. Start Kafka server : $ cd kafka 
 8. Start kafka npm start
+
+
+//updating readme
