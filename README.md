@@ -57,7 +57,6 @@ In this application Passport JS node module is used as a authentication middlewa
 | [Mongoose](https://github.com/Automattic/mongoose) | To work faster with MongoDB | Backend |
 | [Apache Kafka](https://kafka.apache.org/)| Messaging Service | Middleware |
 | [Passport](http://passportjs.org/) | For simplified authentication in Node.js | Backend |
-| [Babel](https://github.com/babel/babel) | Compiles ES6 into ES5 | General |
 
 
 ### Steps to run application:
