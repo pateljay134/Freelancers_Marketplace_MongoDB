@@ -1,6 +1,11 @@
 #  Freelancers' Marketplace using Kafka and MongoDB
 Creating the prototype of Freelancer web application ( freelancer.com ) to demonstrate the use of stateless RESTful web services along with distributed messaging system Kafka as a middleware and NoSQL database MongoDB along with Passport as a authentication service middleware and deployment on Amazon EC2 instance.
 
+
+```
+Individual assignment for CMPE 273 - Enterprise Distributed Systems.
+```
+
 # Overview
 Application is developed in three part
 1. react-client
